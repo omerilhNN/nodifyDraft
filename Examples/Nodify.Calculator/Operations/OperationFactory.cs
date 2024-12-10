@@ -109,13 +109,13 @@ namespace Nodify.Calculator
             switch (info.Type)
             {
                 //Özelleştirilmiş bir Operation kullanmak istediğinde bu kısmı kullanman gerekir
-                //case OperationType.CheckSame:
-                //    return new CheckSameOperationViewModel
-                //    {
-                //        Title = info.Title,
-                //        Operation = info.Operation
-                //    };
-                case OperationType.Expression:
+                case OperationType.CheckSame:
+                return new CheckSameOperationViewModel
+                {
+                    Title = info.Title,
+                    Operation = info.Operation
+                };
+            case OperationType.Expression:
                     return new ExpressionOperationViewModel
                     {
                         Title = info.Title,

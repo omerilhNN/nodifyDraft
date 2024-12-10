@@ -4,6 +4,19 @@ namespace Nodify.Calculator
 {
     public class CheckSameOperationViewModel : OperationViewModel
     {
+        public CheckSameOperationViewModel()
+        {
+            Input.Add(new ConnectorViewModel { 
+                Title = "a"
+            });
+            Input.Add(new ConnectorViewModel
+            {
+                Title = "b"
+            });
+
+
+            Output = new ConnectorViewModel();
+        }
         protected override void OnInputValueChanged()
         {
             base.OnInputValueChanged();

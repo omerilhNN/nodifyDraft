@@ -98,14 +98,14 @@ namespace Nodify.Calculator
                 {
                     var input = Input.Select(i => i.Value).ToArray();
                     Output.Value = Operation?.Execute(input) ?? 0;
-                   if(Output.Value is bool boolean)
-                    {
-                        IsSuccess = boolean;
-                    }
-                    else
-                    {
-                        IsSuccess = null;
-                    }
+                   //if(Output.Value is bool boolean)
+                   // {
+                   //     IsSuccess = boolean;
+                   // }
+                   // else
+                   // {
+                   //     IsSuccess = null;
+                   // }
                 }
                 catch
                 {

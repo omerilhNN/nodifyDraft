@@ -66,6 +66,11 @@ namespace Nodify.Calculator
                     Type = OperationType.Expression,
                     Title = "Custom",
                 },
+                new OperationInfoViewModel
+                {
+                    Type = OperationType.CheckSame,
+                    Title = "CheckSame"
+                }
             };
             operations.AddRange(OperationFactory.GetOperationsInfo(typeof(OperationsContainer)));
 

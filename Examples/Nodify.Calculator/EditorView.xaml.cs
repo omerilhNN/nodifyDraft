@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using Avalonia.Media;
+using System.ComponentModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -14,6 +16,11 @@ namespace Nodify.Calculator
             ItemContainer.DragStartedEvent.AddClassHandler<ItemContainer>(CloseOperationsMenu);
             PointerReleasedEvent.AddClassHandler<NodifyEditor>(OpenOperationsMenu);
             Editor.AddHandler(DragDrop.DropEvent, OnDropNode);
+            if (DataContext is OperationViewModel viewModel)
+            {
+                UpdateGradientBrush(viewModel.IsSuccess);
+                viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            }
         }
         
         private void OpenOperationsMenu(object? sender, PointerReleasedEventArgs e)
@@ -25,7 +32,32 @@ namespace Nodify.Calculator
                 calculator.OperationsMenu.OpenAt(editor.MouseLocation);
             }
         }
+        private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(OperationViewModel.IsSuccess) && sender is OperationViewModel viewModel)
+            {
+                UpdateGradientBrush(viewModel.IsSuccess);
+            }
+        }
 
+        private void UpdateGradientBrush(bool? isSuccess)
+        {
+            var brush = (LinearGradientBrush)Resources["BorderBrushDRAFT"];
+            if (brush != null)
+            {
+                var startColor = (bool)isSuccess ? Colors.Green : Colors.Red;
+                var middleColor = (bool)isSuccess ? Colors.LightGreen : Colors.Orange;
+                var endColor = (bool)isSuccess ? Colors.DarkGreen : Colors.DarkRed;
+
+                brush.GradientStops[0].Color = startColor;
+                brush.GradientStops[1].Color = middleColor;
+                brush.GradientStops[2].Color = endColor;
+            }
+            else
+            {
+
+            }
+        }
         private void CloseOperationsMenuPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             if (e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)

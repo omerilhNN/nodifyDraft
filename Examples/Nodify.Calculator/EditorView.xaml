@@ -15,7 +15,11 @@
              d:DesignWidth="800">
     <UserControl.Resources>
         <local:BoolToBrushConverter x:Key ="BoolToBrushConverter"/>
-        
+        <local:SuccessFailureBrushConverter x:Key="SuccessFailureBrushConverter" />
+        <local:SuccessFailureBackgroundConverter x:Key="SuccessFailureBackgroundConverter" />
+
+
+
         <GeometryDrawing x:Key="SmallGridGeometry"
                          Geometry="M0,0 L0,1 0.03,1 0.03,0.03 1,0.03 1,0 Z"
                          Brush="{DynamicResource GridLinesBrush}" />
@@ -47,6 +51,39 @@
                           Offset="0.5" />
             <GradientStop Color="#ec4899"
                           Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BorderBrushDRAFT"
+                           StartPoint="0%,0%"
+                           EndPoint="100%,0%">
+            <GradientStop Color="#ffffff"
+                          Offset="0" />
+            <GradientStop Color="#ffffff"
+                          Offset="0.5" />
+            <GradientStop Color="#ffffff"
+                          Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="SuccessBrush"
+                     StartPoint="0%,0%"
+                     EndPoint="100%,0%">
+            <GradientStop Color="#00ff00" Offset="0" />
+            <GradientStop Color="#008000" Offset="0.5" />
+            <GradientStop Color="#004d00" Offset="1" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="FailureBrush"
+                             StartPoint="0%,0%"
+                             EndPoint="100%,0%">
+            <GradientStop Color="#ff0000" Offset="0" />
+            <GradientStop Color="#800000" Offset="0.5" />
+            <GradientStop Color="#4d0000" Offset="1" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="DefaultBrush"
+                             StartPoint="0%,0%"
+                             EndPoint="100%,0%">
+            <GradientStop Color="#ffffff" Offset="0" />
+            <GradientStop Color="#ffffff" Offset="0.5" />
+            <GradientStop Color="#ffffff" Offset="1" />
         </LinearGradientBrush>
         
         <Animation x:Key="BorderBrushAnimation"
@@ -129,6 +166,7 @@
                                       CompletedCommand="{Binding DataContext.CreateConnectionCommand, RelativeSource={RelativeSource AncestorType={x:Type nodify:NodifyEditor}}}" />
         </DataTemplate>
         
+        <!--EKRANA SÜRÜKLEDİĞİN NODEUN STYLE'I BURADAN AYARLANIR-->
         <ControlTheme x:Key="ItemContainerStyle"
                TargetType="{x:Type nodify:ItemContainer}"
                BasedOn="{StaticResource {x:Type nodify:ItemContainer}}">
@@ -139,10 +177,11 @@
             <Setter Property="ActualSize"
                     Value="{Binding Size, Mode=OneWayToSource}" />
             <Setter Property="BorderBrush"
-                    Value="{StaticResource BorderBrush}" />
+                    Value="{DynamicResource BorderBrush}" />
             <Setter Property="BorderThickness"
                     Value="2" />
         </ControlTheme>
+        
     </UserControl.Resources>
 
     <Grid>
@@ -203,7 +242,7 @@
                     </Setter>
                 </ControlTheme>
             </nodify:NodifyEditor.Resources>
-
+            
             <nodify:NodifyEditor.DataTemplates>
                 <DataTemplate DataType="{x:Type local:OperationGraphViewModel}">
                     <nodify:GroupingNode Header="{Binding}"
@@ -325,41 +364,27 @@
                     </nodify:Node>
                 </DataTemplate>
                 <!--!!!!!!!!!!!!!!! BURASI ÖZELLEŞTİRİLMİŞ BİR OPERATION TANIMLAMASI YAPMAK İSTEDİĞİNDE YAP-->
-                <!--<DataTemplate DataType="{x:Type local:CheckSameOperationViewModel}">
+                <DataTemplate DataType="{x:Type local:CheckSameOperationViewModel}">
                     <nodify:Node Header="{Binding Title}"
                                  Input="{Binding Input}"
                                  Output="{Binding Output, Converter={StaticResource ItemToListConverter}}"
-                                 BorderBrush="{Binding NodeColor}"
-                        BorderThickness="2">
+                                 BorderBrush="{Binding IsSuccess, Converter={StaticResource SuccessFailureBrushConverter}}"
+                                 Background="{Binding IsSuccess, Converter={StaticResource SuccessFailureBackgroundConverter}}"
+                                 BorderThickness="2">
                         <nodify:Node.ContentTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Margin="5">
-                                    -->
-                <!-- Title --><!--
+
+                                    <!-- Title -->
                                     <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0 0 5 0" />
 
-                                    --><!-- Input Fields --><!--
-                                    <ItemsControl ItemsSource="{Binding Input}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Margin="0 0 5 0">
-                                                    <TextBlock Text="{Binding Title}" VerticalAlignment="Center" Margin="0 5 0 0" />
-                                                    <TextBox Text="{Binding Value, Mode=TwoWay}" Width="100" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
-                                    --><!-- Output Value --><!--
-                                    <TextBlock Text="Output:"
-                                               FontWeight="Bold"
-                                               Margin="0 5 0 0" />
-                                    <TextBox Text="{Binding Output.Value, Mode=OneWay}" IsReadOnly="True" Width="100" />
+                                  
                                 </StackPanel>
                             </DataTemplate>
                         </nodify:Node.ContentTemplate>
                     </nodify:Node>
-                </DataTemplate>-->
+                </DataTemplate>
+
 
 
                 <DataTemplate DataType="{x:Type local:CalculatorOperationViewModel}">
@@ -485,13 +510,14 @@
                                         <sys:String>Output</sys:String>
                                     </collections:ArrayList>
                                 </nodify:Node.Output>
-                                <!-- <nodify:Node.Styles> -->
-                                <!--     <Style Selector="nodify|Node"> -->
-                                <!--         <Style.Animations> -->
-                                <!--             <StaticResource ResourceKey="BorderBrushAnimation" /> -->
-                                <!--         </Style.Animations> -->
-                                <!--     </Style> -->
-                                <!-- </nodify:Node.Styles> -->
+                                 <nodify:Node.Styles>
+                                     <!--nodify namespaceinin altındaki Node kontrolünü elde etmiş olmak istiyorum-->
+                                     <Style Selector="nodify|Node"> 
+                                         <Style.Animations> 
+                                             <StaticResource ResourceKey="BorderBrushAnimation" /> 
+                                         </Style.Animations> 
+                                     </Style> 
+                                 </nodify:Node.Styles> 
                             </nodify:Node>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
