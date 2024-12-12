@@ -109,13 +109,24 @@ namespace Nodify.Calculator
             switch (info.Type)
             {
                 //Özelleştirilmiş bir Operation kullanmak istediğinde bu kısmı kullanman gerekir
+                case OperationType.CalculateArea:
+                    return new CalculateAreaViewModel
+                    { 
+                        Title = info.Title,
+                        Operation = info.Operation,
+                        Output = new ConnectorViewModel
+                        {
+                            Title = "Area"
+                        }
+                    };
+
                 case OperationType.CheckSame:
                 return new CheckSameOperationViewModel
                 {
                     Title = info.Title,
                     Operation = info.Operation
                 };
-            case OperationType.Expression:
+                case OperationType.Expression:
                     return new ExpressionOperationViewModel
                     {
                         Title = info.Title,

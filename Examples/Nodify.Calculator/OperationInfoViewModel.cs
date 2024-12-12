@@ -10,7 +10,8 @@ namespace Nodify.Calculator
         Calculator,
         Group,
         Graph,
-        CheckSame
+        CheckSame,
+        CalculateArea
     }
 
     public class OperationInfoViewModel

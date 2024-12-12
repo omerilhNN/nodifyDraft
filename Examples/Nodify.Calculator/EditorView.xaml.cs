@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,14 +16,16 @@ namespace Nodify.Calculator
             PointerPressedEvent.AddClassHandler<NodifyEditor>(CloseOperationsMenuPointerPressed);
             ItemContainer.DragStartedEvent.AddClassHandler<ItemContainer>(CloseOperationsMenu);
             PointerReleasedEvent.AddClassHandler<NodifyEditor>(OpenOperationsMenu);
-            Editor.AddHandler(DragDrop.DropEvent, OnDropNode);
+            Editor.AddHandler(DragDrop.DropEvent, OnDropNode); // OnDropNode eventi burada handle edilmektedir
+
             if (DataContext is OperationViewModel viewModel)
             {
-                UpdateGradientBrush(viewModel.IsSuccess);
+                UpdateGradientBrush(viewModel.IsSuccess); // MANUEL EKLENDİ İLERİDE SİLİNEBİLİR
                 viewModel.PropertyChanged += OnViewModelPropertyChanged;
             }
         }
-        
+
+
         private void OpenOperationsMenu(object? sender, PointerReleasedEventArgs e)
         {
             if (!e.Handled && e.Source is NodifyEditor editor && !editor.IsPanning && editor.DataContext is CalculatorViewModel calculator &&
@@ -32,6 +35,9 @@ namespace Nodify.Calculator
                 calculator.OperationsMenu.OpenAt(editor.MouseLocation);
             }
         }
+
+        /// !!!!!!!!!!!!!!!!!!! 
+        /// MANUEL EKLEDIN UNUTMA - SİLİNECEK
         private void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(OperationViewModel.IsSuccess) && sender is OperationViewModel viewModel)
@@ -39,7 +45,9 @@ namespace Nodify.Calculator
                 UpdateGradientBrush(viewModel.IsSuccess);
             }
         }
-
+        /// <!--  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SONRADAN EKLENMİŞ OLAN KISIMLAR 
+        /// 
+      
         private void UpdateGradientBrush(bool? isSuccess)
         {
             var brush = (LinearGradientBrush)Resources["BorderBrushDRAFT"];
@@ -58,6 +66,8 @@ namespace Nodify.Calculator
 
             }
         }
+
+        /// ---->!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         private void CloseOperationsMenuPointerPressed(object? sender, PointerPressedEventArgs e)
         {
             if (e.GetCurrentPoint(this).Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
@@ -74,7 +84,7 @@ namespace Nodify.Calculator
                 calculator.OperationsMenu.Close();
             }
         }
-
+        ///<!--  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DroppedNode listesine ekleme yapacağım
         private void OnDropNode(object? sender, DragEventArgs e)
         {
             NodifyEditor? editor = (e.Source as NodifyEditor) ?? (e.Source as Control)?.GetLogicalParent() as NodifyEditor;
@@ -86,9 +96,14 @@ namespace Nodify.Calculator
                 calculator.Operations.Add(op);
 
                 e.Handled = true;
+                // Add the operation to the ViewModel's list
+                //if (DataContext is EditorViewModel viewModel)
+                //{
+                //    viewModel.AddDroppedOperation(operation);
+                //}
             }
         }
-        
+        // -->>>>>> 
         private void OnNodeDrag(object? sender, MouseEventArgs e)
         {
             if(leftButtonPressed && ((Control)sender).DataContext is OperationInfoViewModel operation)

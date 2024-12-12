@@ -1,12 +1,20 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 
 namespace Nodify.Calculator
 {
     public class CalculatorViewModel : ObservableObject
     {
+        private readonly ObservableCollection<OperationViewModel> _droppedOperations;
+
+        public IReadOnlyList<OperationViewModel> DroppedOperations => _droppedOperations;
         public CalculatorViewModel()
         {
+            _droppedOperations = new ObservableCollection<OperationViewModel>();
+            ExecuteAllOperationsHierCommand = new DelegateCommand(ExecuteAllOperations);
+
             CreateConnectionCommand = new DelegateCommand<ConnectorViewModel>(
                 _ => CreateConnection(PendingConnection.Source, PendingConnection.Target),
                 _ => CanCreateConnection(PendingConnection.Source, PendingConnection.Target));
@@ -44,6 +52,7 @@ namespace Nodify.Calculator
 
             Operations.WhenAdded(x =>
             {
+                _droppedOperations.Add(x);
                 x.Input.WhenRemoved(RemoveConnection);
 
                 if (x is CalculatorInputOperationViewModel ci)
@@ -96,13 +105,63 @@ namespace Nodify.Calculator
         public INodifyCommand DisconnectConnectorCommand { get; }
         public INodifyCommand DeleteSelectionCommand { get; }
         public INodifyCommand GroupSelectionCommand { get; }
+        //!!!!!!!!!!!!
+        public INodifyCommand ExecuteAllOperationsHierCommand { get; }
+        //!!!!!
+        private void ExecuteAllOperations()
+        {
+            // Perform topological sort to determine execution order
+            var sortedOperations = TopologicalSort(_droppedOperations);
+
+            foreach (var operation in sortedOperations)
+            {
+                operation.ExecuteOperation(); // Executes the operation logic
+            }
+        }
+        /// !!!!! HIEARCHIAL OPERATION EXECUTION
+        private IEnumerable<OperationViewModel> TopologicalSort(IEnumerable<OperationViewModel> operations)
+        {
+            var sorted = new List<OperationViewModel>();
+            var visited = new HashSet<OperationViewModel>();
+            
+            void Visit(OperationViewModel operation)
+            {
+                if (!visited.Contains(operation))
+                {
+                    visited.Add(operation);
+
+                    var dependencies = Connections
+                        .Where(c => c.Output.Operation == operation)
+                        .Select(c => c.Input.Operation)
+                        .OfType<OperationViewModel>();
+                    foreach (var dependency in dependencies) 
+                    { 
+                        Visit(dependency);
+                    }
+                    sorted.Add(operation);
+                }
+            }
+            foreach(var operation in operations)
+            {
+                Visit(operation);
+            }
+            return sorted;
+
+        }
+            
+        
+        
+        /// !!!!!!
 
         private void DisconnectConnector(ConnectorViewModel connector)
         {
             var connections = Connections.Where(c => c.Input == connector || c.Output == connector).ToList();
             connections.ForEach(c => Connections.Remove(c));
         }
-
+        public void AddDroppedOperation(OperationViewModel operation)
+        {
+            _droppedOperations.Add(operation);
+        }
         internal bool CanCreateConnection(ConnectorViewModel source, ConnectorViewModel? target)
             => target == null || (source != target && source.Operation != target.Operation && source.IsInput != target.IsInput);
 

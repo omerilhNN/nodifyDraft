@@ -70,6 +70,11 @@ namespace Nodify.Calculator
                 {
                     Type = OperationType.CheckSame,
                     Title = "CheckSame"
+                },
+                new OperationInfoViewModel
+                {
+                    Type = OperationType.CalculateArea,
+                    Title = "CalculateArea"
                 }
             };
             operations.AddRange(OperationFactory.GetOperationsInfo(typeof(OperationsContainer)));

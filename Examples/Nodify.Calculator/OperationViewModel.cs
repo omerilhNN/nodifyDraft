@@ -13,11 +13,9 @@ namespace Nodify.Calculator
             {
                 x.Operation = this;
                 x.IsInput = true;
-                x.PropertyChanged += OnInputValueChanged;
             })
             .WhenRemoved(x =>
             {
-                x.PropertyChanged -= OnInputValueChanged;
             });
         }
 
@@ -70,8 +68,8 @@ namespace Nodify.Calculator
         public IOperation? Operation
         {
             get => _operation;
-            set => SetProperty(ref _operation, value)
-                .Then(OnInputValueChanged);
+            set => SetProperty(ref _operation, value);
+                //.Then(OnInputValueChanged);
         }
       
 
@@ -89,7 +87,33 @@ namespace Nodify.Calculator
                 }
             }
         }
+        public void ExecuteOperation()
+        {
+            OnButtonClicked();
+        }
+        protected virtual void OnButtonClicked()
+        {
+            if (Output != null && Operation != null)
+            {
+                try
+                {
+                    var input = Input.Select(i => i.Value).ToArray();
+                    Output.Value = Operation?.Execute(input) ?? 0;
+                    //if(Output.Value is bool boolean)
+                    // {
+                    //     IsSuccess = boolean;
+                    // }
+                    // else
+                    // {
+                    //     IsSuccess = null;asd
+                    // }
+                }
+                catch
+                {
 
+                }
+            }
+        }
         protected virtual void OnInputValueChanged()
         {
             if (Output != null && Operation != null)
@@ -104,7 +128,7 @@ namespace Nodify.Calculator
                    // }
                    // else
                    // {
-                   //     IsSuccess = null;
+                   //     IsSuccess = null;asd
                    // }
                 }
                 catch

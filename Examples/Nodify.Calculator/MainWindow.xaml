@@ -69,7 +69,7 @@
                 </Border.Background>
                 <ScrollViewer HorizontalScrollBarVisibility="Disabled">
                     <StackPanel Margin="10"
-                                IsHitTestVisible="False">
+                                IsHitTestVisible="True">
                         <StackPanel.Resources>
                             <ControlTheme TargetType="{x:Type TextBlock}" x:Key="{x:Type TextBlock}">
                                 <Setter Property="Margin"
@@ -108,23 +108,11 @@
                                     FontWeight="Bold">CTRL + T</Run>
                             <Run>: change theme</Run>
                         </TextBlock>
-                        <TextBlock TextWrapping="Wrap">
-                            <Run Foreground="Red"
-                                    FontWeight="Bold">C</Run>
-                            <Run>: group selection (hold SHIFT and mouse drag the header to move the group node alone)</Run>
-                        </TextBlock>
-                        <TextBlock Text="Drag a connection and drop it on the editor"
-                                TextWrapping="Wrap"
-                                FontWeight="Bold" />
-                        <TextBlock Text="Hover over a connector to see its value"
-                                   TextWrapping="Wrap"
-                                   FontWeight="Bold" />
-                        <TextBlock Text="Create a Calculator node and double click it to open"
-                                   TextWrapping="Wrap"
-                                   FontWeight="Bold" />
-                        <TextBlock Text="Create an Operation Graph and add operations to it"
-                                   TextWrapping="Wrap"
-                                   FontWeight="Bold" />
+                        <Button Content="Run All"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Margin="10"
+                                Command="{Binding SelectedEditor.Calculator.ExecuteAllOperationsHierCommand}"/>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
