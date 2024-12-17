@@ -75,6 +75,11 @@ namespace Nodify.Calculator
                 {
                     Type = OperationType.CalculateArea,
                     Title = "CalculateArea"
+                },
+                new OperationInfoViewModel
+                {
+                    Type = OperationType.RectangleSet,
+                    Title = "Rectangle Set"
                 }
             };
             operations.AddRange(OperationFactory.GetOperationsInfo(typeof(OperationsContainer)));

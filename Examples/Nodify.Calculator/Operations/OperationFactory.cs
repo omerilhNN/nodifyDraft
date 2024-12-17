@@ -28,22 +28,37 @@ namespace Nodify.Calculator
 
                     op.Type = OperationType.Normal;
 
-                    if (para.Length == 2 && method.ReturnType == typeof(double))
+                    if (para.Length == 2 )
                     {
-                        var delType = typeof(Func<double, double, double>);
-                        var del = (Func<double, double, double>)Delegate.CreateDelegate(delType, method);
+                        if(method.ReturnType == typeof(double))
+                        {
+                            var delType = typeof(Func<double, double, double>);
+                            var del = (Func<double, double, double>)Delegate.CreateDelegate(delType, method);
 
-                        op.Operation = new BinaryOperation(del);
-                    }
-                    else if (para.Length == 2 && method.ReturnType == typeof(bool))
-                    {
-                        var delType = typeof(Func<double, double, bool>);
-                        var del = (Func<double, double, bool>)Delegate.CreateDelegate(delType, method);
-                        op.Operation = new CheckSameOperation(del);
-
+                            op.Operation = new BinaryOperation(del);
+                        }
+                        if(method.ReturnType == typeof(bool))
+                        {
+                            var delType = typeof(Func<double, double, bool>);
+                            var del = (Func<double, double, bool>)Delegate.CreateDelegate(delType, method);
+                            op.Operation = new CheckSameOperation(del);
+                        }
+                        if(method.ReturnType == typeof(RectangleViewModel))
+                        {
+                            var delType = typeof(Func<double,double, RectangleViewModel>);
+                            var del = (Func<double, double, RectangleViewModel>)Delegate.CreateDelegate(delType, method);
+                            op.Operation = new RectangleSetOperation(del);
+                        }
                     }
                     else if (para.Length == 1)
                     {
+                        if ( para[0].ParameterType == typeof(RectangleViewModel)
+                        && method.ReturnType == typeof(double))
+                        {
+                            var delType = typeof(Func<RectangleViewModel, double>);
+                            var del = (Func<RectangleViewModel, double>)Delegate.CreateDelegate(delType, method);
+                            op.Operation = new CalculateAreaOperation(del);
+                        }
                         if (para[0].ParameterType.IsArray)
                         {
                             op.Type = OperationType.Expando;
@@ -62,6 +77,9 @@ namespace Nodify.Calculator
                             op.Operation = new UnaryOperation(del);
                         }
                     }
+                
+
+                      
                     else if (para.Length == 0)
                     {
                         var delType = typeof(Func<double>);
@@ -114,12 +132,12 @@ namespace Nodify.Calculator
                     { 
                         Title = info.Title,
                         Operation = info.Operation,
-                        Output = new ConnectorViewModel
-                        {
-                            Title = "Area"
-                        }
                     };
-
+                case OperationType.RectangleSet:
+                    return new RectangleSetOperationViewModel { 
+                        Title = info.Title,
+                        Operation = info.Operation
+                    };
                 case OperationType.CheckSame:
                 return new CheckSameOperationViewModel
                 {

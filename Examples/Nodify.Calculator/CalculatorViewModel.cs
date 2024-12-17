@@ -82,6 +82,17 @@ namespace Nodify.Calculator
             OperationsMenu = new OperationsMenuViewModel(this);
         }
 
+        ///SİLİNECEKKKKK
+        private void PropagateValues(OperationViewModel operation)
+        {
+            var connections = Connections.Where(c => c.Output.Operation == operation);
+            foreach (var connection in connections)
+            {
+                connection.Input.Value = connection.Output.Value; // Transfer value from output to connected input
+            }
+        }
+        // !!!!!!!!!!
+
         private NodifyObservableCollection<OperationViewModel> _operations = new NodifyObservableCollection<OperationViewModel>();
         public NodifyObservableCollection<OperationViewModel> Operations
         {
@@ -116,6 +127,7 @@ namespace Nodify.Calculator
             foreach (var operation in sortedOperations)
             {
                 operation.ExecuteOperation(); // Executes the operation logic
+                PropagateValues(operation);
             }
         }
         /// !!!!! HIEARCHIAL OPERATION EXECUTION

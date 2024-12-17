@@ -8,19 +8,25 @@ namespace Nodify.Calculator
 {
 
     //Operation Factory'e implement etmen gerekebilir fakat şuanda bu işi BinaryOperation yapıyor çünkü aynı parametre ve dönüş değerlerini almaktadırlar
-    public class CalculateAreaOperation
+    public class CalculateAreaOperation:IOperation
     {
-        private readonly Func<double, double, double> _func;
+        private readonly Func<RectangleViewModel, double> _func;
 
-        public CalculateAreaOperation(Func<double, double, double> func)
+        public CalculateAreaOperation(Func<RectangleViewModel, double> func)
            => _func = func;
         public object Execute(params object[] operands)
         {
-            var param1 = Convert.ToDouble(operands[0]);
-            var param2 = Convert.ToDouble(operands[1]); 
+            var param1 = operands[0] as RectangleViewModel;
+            if (param1 == null)
+            {
+                Console.WriteLine("Conversion failed: Operand is not a RectangleViewModel.");
+            }
 
-            return _func.Invoke(param1, param2);    
+
+
+            // Invoke the function with the converted parameter
+            return _func.Invoke(param1);
+
         }
-        
     }
 }

@@ -53,22 +53,22 @@ namespace Nodify.Calculator
             {
                 try
                 {
-                    var firstValue = Input.First().Value;
-                    IsSuccess = Input.All(i => Equals(i.Value, firstValue)); // Tüm input değerleri aynı mı?
+                    //var firstValue = Input.First().Value;
+                    //IsSuccess = Input.All(i => Equals(i.Value, firstValue)); // Tüm input değerleri aynı mı?
 
-                    if (Output != null)
-                    {
-                        // Output.Value'ı IsSuccess'e eşitle
-                        Output.Value = IsSuccess;
-                    }
+                    //if (Output != null)
+                    //{
+                    //    // Output.Value'ı IsSuccess'e eşitle
+                    //    Output.Value = IsSuccess;
+                    //}
                 }
                 catch
                 {
-                    IsSuccess = false;
-                    if (Output != null)
-                    {
-                        Output.Value = IsSuccess;
-                    }
+                    //IsSuccess = false;
+                    //if (Output != null)
+                    //{
+                    //    Output.Value = IsSuccess;
+                    //}
                 }
             }
         }

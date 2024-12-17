@@ -13,9 +13,11 @@ namespace Nodify.Calculator
             {
                 x.Operation = this;
                 x.IsInput = true;
+                //x.PropertyChanged += OnInputValueChanged;
             })
             .WhenRemoved(x =>
             {
+                //x.PropertyChanged -= OnInputValueChanged;
             });
         }
 
