@@ -28,6 +28,7 @@
     <Window.Resources>
         <shared:BindingProxy x:Key="Proxy" 
                              DataContext="{Binding}"/>
+        <local:CalculatorViewModel x:Key="CalculatorViewModel" />
     </Window.Resources>
     
     <Window.DataTemplates>
@@ -111,8 +112,15 @@
                         <Button Content="Run All"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Top"
-                                Margin="10"
-                                Command="{Binding SelectedEditor.Calculator.ExecuteAllOperationsHierCommand}"/>
+                                Margin="5"
+                                DataContext="{Binding SelectedEditor.Calculator}"
+                                Command="{Binding ExecuteAllOperationsAndGenerateCodeCommand}}"/>
+                        <!--<Button Content="Generate Code"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Top"
+                         Margin="5"
+                         Command="{Binding SelectedEditor.Calculator.GenerateCodeCommand}"/>-->
+
                     </StackPanel>
                 </ScrollViewer>
             </Border>

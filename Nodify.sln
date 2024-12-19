@@ -17,17 +17,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Calculator", "Exampl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{88D231A7-D09F-492F-887F-DDBC46398284}"
 	ProjectSection(SolutionItems) = preProject
-		CHANGELOG.md = CHANGELOG.md
 		build_cloudflare.sh = build_cloudflare.sh
-		README.md = README.md
+		CHANGELOG.md = CHANGELOG.md
 		Directory.Build.props = Directory.Build.props
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Shapes", "Examples\Nodify.Shapes\Nodify.Shapes.csproj", "{BAD92DB9-BDCA-4BB7-8F24-B7D3FE470476}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Shapes", "Examples\Nodify.Shapes\Nodify.Shapes.csproj", "{BAD92DB9-BDCA-4BB7-8F24-B7D3FE470476}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Shapes.Web", "Examples\Nodify.Shapes.Web\Nodify.Shapes.Web.csproj", "{8F4D5A6D-CA3A-4C0C-9597-7D0E2EDFAB21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Shapes.Web", "Examples\Nodify.Shapes.Web\Nodify.Shapes.Web.csproj", "{8F4D5A6D-CA3A-4C0C-9597-7D0E2EDFAB21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nodify.Shapes.Desktop", "Examples\Nodify.Shapes.Desktop\Nodify.Shapes.Desktop.csproj", "{D53C27C4-C49D-40DD-87BB-CC6431999BF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Shapes.Desktop", "Examples\Nodify.Shapes.Desktop\Nodify.Shapes.Desktop.csproj", "{D53C27C4-C49D-40DD-87BB-CC6431999BF8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DriverBase", "..\..\DriverTAI\Tests\C130\Tests\Drivers\DriverBase\DriverBase.csproj", "{39382130-52F2-4840-ADDE-00E13A599413}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,10 @@ Global
 		{D53C27C4-C49D-40DD-87BB-CC6431999BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D53C27C4-C49D-40DD-87BB-CC6431999BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D53C27C4-C49D-40DD-87BB-CC6431999BF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39382130-52F2-4840-ADDE-00E13A599413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39382130-52F2-4840-ADDE-00E13A599413}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39382130-52F2-4840-ADDE-00E13A599413}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39382130-52F2-4840-ADDE-00E13A599413}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

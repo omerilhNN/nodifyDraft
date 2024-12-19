@@ -10,7 +10,22 @@
   <ItemGroup>
     <PackageReference Include="StringMath" Version="4.1.2" />
   </ItemGroup>
-
+  
+  <!--OCTOPUS ve DRIVER BASE dll referansları burada verilmiştir-->
+  <ItemGroup>
+    <Reference Include="OctopusDriverBase">
+      <HintPath>..\..\..\..\DriverTAI\Bin\OctopusDriverBase.dll</HintPath>
+    </Reference>
+    <Reference Include="DriverBase">
+      <HintPath>..\..\..\..\DriverTAI\Bin\DriverBase.dll</HintPath>  
+    </Reference>
+    <Reference Include="Octopus">
+      <HintPath>..\..\..\..\DriverTAI\Bin\Octopus.dll</HintPath>
+    </Reference>
+    
+  </ItemGroup>
+<!-- !!! dll Referanslama sonu-->
+  
   <ItemGroup>
     <ProjectReference Include="..\..\Nodify\Nodify.csproj" />
     <ProjectReference Include="..\Nodify.Shared\Nodify.Shared.csproj" />

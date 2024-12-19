@@ -1,6 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Nodify.Calculator.CodeGenerationTools;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Nodify.Calculator
@@ -13,7 +18,7 @@ namespace Nodify.Calculator
         public CalculatorViewModel()
         {
             _droppedOperations = new ObservableCollection<OperationViewModel>();
-            ExecuteAllOperationsHierCommand = new DelegateCommand(ExecuteAllOperations);
+            ExecuteAllOperationsAndGenerateCodeCommand = new DelegateCommand(ExecuteAllOperationsAndGenerateCode);
 
             CreateConnectionCommand = new DelegateCommand<ConnectorViewModel>(
                 _ => CreateConnection(PendingConnection.Source, PendingConnection.Target),
@@ -117,25 +122,61 @@ namespace Nodify.Calculator
         public INodifyCommand DeleteSelectionCommand { get; }
         public INodifyCommand GroupSelectionCommand { get; }
         //!!!!!!!!!!!!
-        public INodifyCommand ExecuteAllOperationsHierCommand { get; }
-        //!!!!!
-        private void ExecuteAllOperations()
+        public INodifyCommand ExecuteAllOperationsAndGenerateCodeCommand { get; }
+        public INodifyCommand GenerateCodeCommand { get; }
+        //!!!!! ELLE EKLEDİM : ExecuteAllOperations
+        private void  ExecuteAllOperationsAndGenerateCode()
         {
-            // Perform topological sort to determine execution order
-            var sortedOperations = TopologicalSort(_droppedOperations);
+          //!!! REVERSE için Açıklama !!!
+          //CODE GENERATION'DA nodelardan generate edilen kod ters sırada yazılıyordu bunun önüne geçmek için REVERSE metodu eklendi!!!!
+            var sortedOperations = TopologicalSort(_droppedOperations).ToList();
+            sortedOperations.Reverse();
 
             foreach (var operation in sortedOperations)
             {
-                operation.ExecuteOperation(); // Executes the operation logic
-                PropagateValues(operation);
+                 ExecuteAllOperations(operation);
+            }
+            var generatedCode = GenerateCodeFromOperations(sortedOperations);
+
+            var directoryPath = Path.Combine("..", "..", "..", "GeneratedCode");
+            var filePath = Path.Combine(directoryPath, "GeneratedOperationsCode_GEN.cs");
+
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            File.WriteAllText(filePath, generatedCode);
+        }
+        private void ExecuteAllOperations(OperationViewModel operation)
+        {
+            if (operation != null)
+            {
+                Console.WriteLine($"Executing operation: {operation.GetType().Name}");
+
+                try
+                {
+                    // Execute the operation logic
+                    operation.ExecuteOperation();
+
+                    // Ensure values propagate after execution
+                    PropagateValues(operation);
+
+                    Console.WriteLine($"Completed operation: {operation.GetType().Name}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error executing operation {operation.GetType().Name}: {ex.Message}");
+                    throw; // Propagate the exception if needed
+                }
             }
         }
         /// !!!!! HIEARCHIAL OPERATION EXECUTION
-        private IEnumerable<OperationViewModel> TopologicalSort(IEnumerable<OperationViewModel> operations)
+        private IEnumerable<OperationViewModel> TopologicalSort(IEnumerable<OperationViewModel>  operations)
         {
             var sorted = new List<OperationViewModel>();
             var visited = new HashSet<OperationViewModel>();
-            
+
             void Visit(OperationViewModel operation)
             {
                 if (!visited.Contains(operation))
@@ -146,24 +187,105 @@ namespace Nodify.Calculator
                         .Where(c => c.Output.Operation == operation)
                         .Select(c => c.Input.Operation)
                         .OfType<OperationViewModel>();
-                    foreach (var dependency in dependencies) 
-                    { 
+                    foreach (var dependency in dependencies)
+                    {
                         Visit(dependency);
                     }
                     sorted.Add(operation);
                 }
             }
-            foreach(var operation in operations)
+            //foreach(var operation in operations)
+            //{
+            //    Visit(operation);
+            //}
+            foreach (var operation in operations)
             {
-                Visit(operation);
+                if (!Connections.Any(c => c.Input.Operation == operation))
+                {
+                    Visit(operation);
+                }
             }
             return sorted;
 
         }
-            
-        
-        
-        /// !!!!!!
+      
+
+        /// <-!!!!!!
+        /// CODE GENERATION YAPILACAK ALAN
+        private string GenerateCodeFromOperations(IEnumerable<OperationViewModel> sortedOperations)
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine($@"using System;");
+            sb.AppendLine($@"using DriverBase;");
+            sb.AppendLine($@"using DriverBase_Platform;");
+            sb.AppendLine($@"using Octopus;");
+            sb.AppendLine($@"using Nodify.Calculator;");
+
+            sb.AppendLine($@"public class TC_GENERATED_OMER : AbsTesterDriver");
+            sb.AppendLine("{");
+
+                sb.AppendLine("static Octolog Log = new Octolog();");
+                sb.AppendLine($@"public void Setup(){{
+                SetupBase();
+                Log.Set_Author(""Mehmet Erkuş"");
+                Log.Set_ExecutedBy(""Mehmet Erkuş"");
+                Log.Set_UutVersion(""SRS_LLR_DISCRET_IN(Baseline 7.0), SRS_DISCRETE_IN(Baseline 5.0), DD_DISCRETE_IN(Baseline 7.0)"");
+                if (SuiteConfig.configId == ConfigId.MANUAL)
+                {{
+                            Defs.TIME_OUT = 1_000_000; 
+                }}");
+            sb.AppendLine("}");
+            sb.AppendLine($@" public static class Defs{{
+            public static int TIME_OUT = 1_000; // 1 second
+            public static byte True = 1;
+            public static byte False = 0;");
+            sb.AppendLine("}");
+            sb.AppendLine($@"public void TCF_OFI()");
+            sb.AppendLine("{");
+            sb.AppendLine("Setup();");
+            foreach (var operation in sortedOperations)
+            {
+                if (operation is RectangleSetOperationViewModel rectangleSet)
+                {
+                    sb.AppendLine($"var rectangle = new RectangleViewModel();");
+                    sb.AppendLine($"rectangle.Width=  {rectangleSet.Input[0].Value} ;;");
+                    sb.AppendLine($"rectangle.Width= {rectangleSet.Input[0].Value};");
+
+
+                }
+                else if (operation is CalculateAreaViewModel calculateArea)
+                {
+
+                    sb.AppendLine($"        rectangle.Area = {calculateArea.Output.Value};");
+                }
+                else if (operation is CheckSameOperationViewModel checkSame)
+                {
+                    sb.AppendLine($@"        Log.CheckSame({operation.Input[0].Value}, {operation.Input[1].Value},
+                        Spec.CFR($@""[REQ];
+                        Verify result to DRIVER_INVALID_PARAMETER.""));");
+                }
+            }
+            sb.AppendLine("}");
+
+
+            sb.AppendLine("}");
+            //string directoryPath = Path.Combine("..", "..", "..", "GeneratedCode");
+            //string filePath = Path.Combine(directoryPath, "GeneratedOperationsCode_GEN.cs");
+
+            //if (!Directory.Exists(directoryPath))
+            //{
+            //    Directory.CreateDirectory(directoryPath);
+            //}
+            //File.WriteAllText(filePath, sb.ToString());
+
+            //// Optionally inform the user
+            //Console.WriteLine($"Code generated successfully! Saved to {filePath}");
+            return sb.ToString();
+        }
+
+        /// !!!!->
+
 
         private void DisconnectConnector(ConnectorViewModel connector)
         {
