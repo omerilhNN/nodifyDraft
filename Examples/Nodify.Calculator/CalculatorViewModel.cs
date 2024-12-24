@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,8 +16,10 @@ namespace Nodify.Calculator
         private readonly ObservableCollection<OperationViewModel> _droppedOperations;
 
         public IReadOnlyList<OperationViewModel> DroppedOperations => _droppedOperations;
+        public static CalculatorViewModel Instance { get; private set; }
         public CalculatorViewModel()
         {
+            Instance = this;
             _droppedOperations = new ObservableCollection<OperationViewModel>();
             ExecuteAllOperationsAndGenerateCodeCommand = new AsyncDelegateCommand(ExecuteAllOperationsAndGenerateCode);
 
@@ -150,50 +153,72 @@ namespace Nodify.Calculator
         }
         private async Task ExecuteOperationAsync(OperationViewModel operation)
         {
-            if (operation != null)
+            #region TASK COMPLETION ROUTINE HALİ
+            //if (operation != null)
+            //{
+            //    Console.WriteLine($"Executing operation: {operation.GetType().Name}");
+
+            //    // Use TaskCompletionSource to wait for execution
+            //    var tcs = new TaskCompletionSource<bool>();
+
+            //    // Start executing the operation
+            //    Task.Run(async () =>
+            //    {
+            //        try
+            //        {
+            //            operation.ExecuteOperation(); // Execute the operation logic
+            //            PropagateValues(operation);  // Ensure values propagate after execution
+
+            //            tcs.SetResult(true); // Indicate completion
+            //            await Task.Delay(100);
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            tcs.SetException(ex); // Handle any exceptions
+            //        }
+            //    });
+            //    await tcs.Task;
+            //try
+            //{
+            //    // Execute the operation asynchronously
+            //    await Task.Run(() =>
+            //    {
+            //        operation.ExecuteOperation(); // Execute the operation logic
+            //        PropagateValues(operation);  // Ensure values propagate after execution
+
+            //        tcs.SetResult(true); // Indicate completion
+            //    });
+
+            //    // Await the completion of the TaskCompletionSource
+            //    await tcs.Task;
+
+            //    Console.WriteLine($"Completed operation: {operation.GetType().Name}");
+            //}
+            //catch (Exception ex)
+            //{
+            //    tcs.SetException(ex); // Handle any exceptions
+            //    Console.WriteLine($"An error occurred: {ex.Message}");
+            //}
+            //}
+            #endregion
+            if (operation == null) return;
+            Console.WriteLine($"Executing operation: {operation.GetType().Name}");
+
+            try
             {
-                Console.WriteLine($"Executing operation: {operation.GetType().Name}");
-
-                // Use TaskCompletionSource to wait for execution
-                var tcs = new TaskCompletionSource<bool>();
-
-                // Start executing the operation
-                Task.Run(() =>
+                await Task.Run(() =>
                 {
-                    try
-                    {
-                        operation.ExecuteOperation(); // Execute the operation logic
-                        PropagateValues(operation);  // Ensure values propagate after execution
-
-                        tcs.SetResult(true); // Indicate completion
-                    }
-                    catch (Exception ex)
-                    {
-                        tcs.SetException(ex); // Handle any exceptions
-                    }
+                    operation.ExecuteOperation(); // Perform the operation logic
+                    PropagateValues(operation);  // Ensure values propagate
                 });
-                await tcs.Task;
-                //try
-                //{
-                //    // Execute the operation asynchronously
-                //    await Task.Run(() =>
-                //    {
-                //        operation.ExecuteOperation(); // Execute the operation logic
-                //        PropagateValues(operation);  // Ensure values propagate after execution
 
-                //        tcs.SetResult(true); // Indicate completion
-                //    });
+                await Task.Delay(100);
 
-                //    // Await the completion of the TaskCompletionSource
-                //    await tcs.Task;
-
-                //    Console.WriteLine($"Completed operation: {operation.GetType().Name}");
-                //}
-                //catch (Exception ex)
-                //{
-                //    tcs.SetException(ex); // Handle any exceptions
-                //    Console.WriteLine($"An error occurred: {ex.Message}");
-                //}
+                await TriggerDependentOperationsAsync(operation);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error executing operation {operation.GetType().Name}: {ex.Message}");
             }
         }
         /// !!!!! HIEARCHIAL OPERATION EXECUTION
@@ -233,7 +258,26 @@ namespace Nodify.Calculator
             return sorted;
 
         }
-      
+
+        //Bir operasyonun çıtkısına bağlı olarak diğer operasyonları asenkron olarak tetiklemek ve sıralı bir şekilde yürütmek için
+        private async Task TriggerDependentOperationsAsync(OperationViewModel operation)
+        {
+            if (operation == null) return;
+
+            //Connections: Tüm bağlantılar
+            // Çıkışı şu anki operasyondan üretilen -- Girişine gelen node'un operation'ı boş olmayanları al ->> Giriş düğümündeki operasyonları seç listede tut
+            var dependentOperations = Connections
+                .Where(c => c.Output.Operation == operation && c.Input.Operation != null)
+                .Select(c => c.Input.Operation)
+                .OfType<OperationViewModel>()
+                .ToList();
+
+            foreach (var dependentOperation in dependentOperations)
+            {
+                await ExecuteOperationAsync(dependentOperation); // Her dependent operasyon asenkron çalıştır
+            }
+        }
+
 
         /// <-!!!!!!
         /// CODE GENERATION YAPILACAK ALAN
@@ -253,8 +297,8 @@ namespace Nodify.Calculator
                 sb.AppendLine("static Octolog Log = new Octolog();");
                 sb.AppendLine($@"public void Setup(){{
                 SetupBase();
-                Log.Set_Author(""Mehmet Erkuş"");
-                Log.Set_ExecutedBy(""Mehmet Erkuş"");
+                Log.Set_Author(""Ömer Faruk İlhan"");
+                Log.Set_ExecutedBy(""Ömer Faruk İlhan"");
                 Log.Set_UutVersion(""SRS_LLR_DISCRET_IN(Baseline 7.0), SRS_DISCRETE_IN(Baseline 5.0), DD_DISCRETE_IN(Baseline 7.0)"");
                 if (SuiteConfig.configId == ConfigId.MANUAL)
                 {{
@@ -274,8 +318,8 @@ namespace Nodify.Calculator
                 if (operation is RectangleSetOperationViewModel rectangleSet)
                 {
                     sb.AppendLine($"var rectangle = new RectangleViewModel();");
-                    sb.AppendLine($"rectangle.Width=  {rectangleSet.Input[0].Value} ;;");
-                    sb.AppendLine($"rectangle.Width= {rectangleSet.Input[0].Value};");
+                    sb.AppendLine($"rectangle.Width=  {rectangleSet.Input[0].Value};");
+                    sb.AppendLine($"rectangle.Height= {rectangleSet.Input[1].Value};");
 
 
                 }

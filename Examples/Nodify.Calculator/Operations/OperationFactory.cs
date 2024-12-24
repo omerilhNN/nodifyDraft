@@ -131,11 +131,13 @@ namespace Nodify.Calculator
                     return new CalculateAreaViewModel
                     { 
                         Title = info.Title,
+                        Output = new ConnectorViewModel(),
                         Operation = info.Operation,
                     };
                 case OperationType.RectangleSet:
                     return new RectangleSetOperationViewModel { 
                         Title = info.Title,
+                        Output = new ConnectorViewModel(),
                         Operation = info.Operation
                     };
                 case OperationType.CheckSame:

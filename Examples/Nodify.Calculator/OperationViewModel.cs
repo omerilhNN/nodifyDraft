@@ -98,7 +98,8 @@ namespace Nodify.Calculator
         }
         public void ExecuteOperation()
         {
-            OnButtonClicked();
+            OnButtonClicked(); //Mevcut operasyon çalıştırılır
+            TriggerDependentOperations(); // Mevcut operasyona bağlı operasyonlar asenkron olarak tetiklenir.
         }
 
         protected virtual void OnButtonClicked()
@@ -109,14 +110,6 @@ namespace Nodify.Calculator
                 {
                     var input = Input.Select(i => i.Value).ToArray();
                     Output.Value = Operation?.Execute(input) ?? 0;
-                    //if(Output.Value is bool boolean)
-                    // {
-                    //     IsSuccess = boolean;
-                    // }
-                    // else
-                    // {
-                    //     IsSuccess = null;asd
-                    // }
                 }
                 catch
                 {
@@ -132,18 +125,26 @@ namespace Nodify.Calculator
                 {
                     var input = Input.Select(i => i.Value).ToArray();
                     Output.Value = Operation?.Execute(input) ?? 0;
-                    //if(Output.Value is bool boolean)
-                    // {
-                    //     IsSuccess = boolean;
-                    // }
-                    // else
-                    // {
-                    //     IsSuccess = null;asd
-                    // }
                 }
                 catch
                 {
 
+                }
+            }
+        }
+        protected void TriggerDependentOperations()
+        {
+            if (Output != null)
+            {
+                var dependentOperations = CalculatorViewModel.Instance.Connections
+                    .Where(c => c.Output == Output && c.Input.Operation != null)
+                    .Select(c => c.Input.Operation)
+                    .OfType<OperationViewModel>()
+                    .ToList();
+
+                foreach (var dependentOperation in dependentOperations)
+                {
+                    dependentOperation.ExecuteOperation();
                 }
             }
         }

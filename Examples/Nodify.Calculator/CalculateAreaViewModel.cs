@@ -13,7 +13,7 @@ namespace Nodify.Calculator
             {
                 Title = "Rectangle Input:",
             });
-            Output = new ConnectorViewModel();
+
         }
         protected override void OnButtonClicked()
         {
@@ -22,26 +22,21 @@ namespace Nodify.Calculator
             {
                 try
                 {
-                    // Explicit type check and cast
                     if (Input[0].Value is RectangleViewModel rectangleInput)
                     {
-                        // Safely calculate the area
                         if (rectangleInput.Width.HasValue && rectangleInput.Height.HasValue)
                         {
                             double w = Convert.ToDouble(rectangleInput.Width);
                             double h = Convert.ToDouble(rectangleInput.Height);
                             double area = w * h;
 
-                            // Update the rectangle's Area property
                             rectangleInput.Area = area;
 
-                            // Assign the area to Output
                             if (Output == null)
                                 Output = new ConnectorViewModel();
 
                             Output.Value = area;
 
-                            // Log results for debugging
                             Console.WriteLine($"Rectangle Area Calculated: {area}");
                         }
                         else
@@ -63,8 +58,7 @@ namespace Nodify.Calculator
             {
                 Console.WriteLine("Input is not properly initialized or Input[0].Value is null.");
             }
-
-
+            TriggerDependentOperations();
         }
         protected override void OnInputValueChanged()
         {

@@ -19,7 +19,7 @@ namespace Nodify.Calculator
         }
         protected override void OnButtonClicked()
         {
-            base.OnButtonClicked();
+            //base.OnButtonClicked();
             if (Input.Count > 1)
             {
                 try

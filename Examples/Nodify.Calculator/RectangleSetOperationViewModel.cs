@@ -17,7 +17,6 @@ namespace Nodify.Calculator
             {
                 Title = "Height"
             });
-            Output = new ConnectorViewModel();
         }
 
         protected override void OnButtonClicked()
