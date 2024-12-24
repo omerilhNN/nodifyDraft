@@ -18,7 +18,7 @@ namespace Nodify.Calculator
         public CalculatorViewModel()
         {
             _droppedOperations = new ObservableCollection<OperationViewModel>();
-            ExecuteAllOperationsAndGenerateCodeCommand = new DelegateCommand(ExecuteAllOperationsAndGenerateCode);
+            ExecuteAllOperationsAndGenerateCodeCommand = new AsyncDelegateCommand(ExecuteAllOperationsAndGenerateCode);
 
             CreateConnectionCommand = new DelegateCommand<ConnectorViewModel>(
                 _ => CreateConnection(PendingConnection.Source, PendingConnection.Target),
@@ -125,7 +125,7 @@ namespace Nodify.Calculator
         public INodifyCommand ExecuteAllOperationsAndGenerateCodeCommand { get; }
         public INodifyCommand GenerateCodeCommand { get; }
         //!!!!! ELLE EKLEDİM : ExecuteAllOperations
-        private void  ExecuteAllOperationsAndGenerateCode()
+        private async Task ExecuteAllOperationsAndGenerateCode()
         {
           //!!! REVERSE için Açıklama !!!
           //CODE GENERATION'DA nodelardan generate edilen kod ters sırada yazılıyordu bunun önüne geçmek için REVERSE metodu eklendi!!!!
@@ -134,7 +134,7 @@ namespace Nodify.Calculator
 
             foreach (var operation in sortedOperations)
             {
-                 ExecuteAllOperations(operation);
+                await ExecuteOperationAsync(operation);
             }
             var generatedCode = GenerateCodeFromOperations(sortedOperations);
 
@@ -148,27 +148,52 @@ namespace Nodify.Calculator
 
             File.WriteAllText(filePath, generatedCode);
         }
-        private void ExecuteAllOperations(OperationViewModel operation)
+        private async Task ExecuteOperationAsync(OperationViewModel operation)
         {
             if (operation != null)
             {
                 Console.WriteLine($"Executing operation: {operation.GetType().Name}");
 
-                try
-                {
-                    // Execute the operation logic
-                    operation.ExecuteOperation();
+                // Use TaskCompletionSource to wait for execution
+                var tcs = new TaskCompletionSource<bool>();
 
-                    // Ensure values propagate after execution
-                    PropagateValues(operation);
-
-                    Console.WriteLine($"Completed operation: {operation.GetType().Name}");
-                }
-                catch (Exception ex)
+                // Start executing the operation
+                Task.Run(() =>
                 {
-                    Console.WriteLine($"Error executing operation {operation.GetType().Name}: {ex.Message}");
-                    throw; // Propagate the exception if needed
-                }
+                    try
+                    {
+                        operation.ExecuteOperation(); // Execute the operation logic
+                        PropagateValues(operation);  // Ensure values propagate after execution
+
+                        tcs.SetResult(true); // Indicate completion
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.SetException(ex); // Handle any exceptions
+                    }
+                });
+                await tcs.Task;
+                //try
+                //{
+                //    // Execute the operation asynchronously
+                //    await Task.Run(() =>
+                //    {
+                //        operation.ExecuteOperation(); // Execute the operation logic
+                //        PropagateValues(operation);  // Ensure values propagate after execution
+
+                //        tcs.SetResult(true); // Indicate completion
+                //    });
+
+                //    // Await the completion of the TaskCompletionSource
+                //    await tcs.Task;
+
+                //    Console.WriteLine($"Completed operation: {operation.GetType().Name}");
+                //}
+                //catch (Exception ex)
+                //{
+                //    tcs.SetException(ex); // Handle any exceptions
+                //    Console.WriteLine($"An error occurred: {ex.Message}");
+                //}
             }
         }
         /// !!!!! HIEARCHIAL OPERATION EXECUTION

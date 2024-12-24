@@ -20,6 +20,13 @@ namespace Nodify.Calculator
                 //x.PropertyChanged -= OnInputValueChanged;
             });
         }
+        //TODO: PREVIOUS NODE TUTMAK İÇİN BU GELİŞTİRİLEBİLİR
+        //private OperationViewModel? _previous;
+        //public OperationViewModel? Previous
+        //{
+        //    get => _previous;
+        //    set => SetProperty(ref _previous, value);
+        //}
 
         private void OnInputValueChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -56,7 +63,6 @@ namespace Nodify.Calculator
             get => _isSuccess;
             set=> SetProperty(ref _isSuccess, value);    
         }
-
         private bool _isSelected;
         public bool IsSelected
         {
@@ -70,8 +76,9 @@ namespace Nodify.Calculator
         public IOperation? Operation
         {
             get => _operation;
-            set => SetProperty(ref _operation, value);
-                //.Then(OnInputValueChanged);
+            set => SetProperty(ref _operation, value)
+                   .Then(OnInputValueChanged);
+            
         }
       
 
@@ -93,6 +100,7 @@ namespace Nodify.Calculator
         {
             OnButtonClicked();
         }
+
         protected virtual void OnButtonClicked()
         {
             if (Output != null && Operation != null)
@@ -124,14 +132,14 @@ namespace Nodify.Calculator
                 {
                     var input = Input.Select(i => i.Value).ToArray();
                     Output.Value = Operation?.Execute(input) ?? 0;
-                   //if(Output.Value is bool boolean)
-                   // {
-                   //     IsSuccess = boolean;
-                   // }
-                   // else
-                   // {
-                   //     IsSuccess = null;asd
-                   // }
+                    //if(Output.Value is bool boolean)
+                    // {
+                    //     IsSuccess = boolean;
+                    // }
+                    // else
+                    // {
+                    //     IsSuccess = null;asd
+                    // }
                 }
                 catch
                 {

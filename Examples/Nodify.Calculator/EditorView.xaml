@@ -13,6 +13,8 @@
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
+    
+    
     <UserControl.Resources>
         <local:BoolToBrushConverter x:Key ="BoolToBrushConverter"/>
         <local:SuccessFailureBrushConverter x:Key="SuccessFailureBrushConverter" />
@@ -185,6 +187,11 @@
     </UserControl.Resources>
 
     <Grid>
+        <Button Content="Run All"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               Margin="10"
+               Command="{Binding Calculator.ExecuteAllOperationsAndGenerateCodeCommand}" />
         <nodify:NodifyEditor DataContext="{Binding Calculator}"
                              ItemsSource="{Binding Operations}"
                              Connections="{Binding Connections}"
@@ -465,7 +472,6 @@
                 </collections:ArrayList>
             </nodify:NodifyEditor.Decorators>
         </nodify:NodifyEditor>
-
         <Grid Background="{StaticResource LargeGridLinesDrawingBrush}"
               Panel.ZIndex="-2" />
 
@@ -480,6 +486,7 @@
                 <SolidColorBrush Color="{DynamicResource BackgroundColor}"
                                  Opacity="0.7" />
             </Border.Background>
+            
             <ScrollViewer>
                 <ItemsControl ItemsSource="{Binding Calculator.OperationsMenu.AvailableOperations}">
                     <ItemsControl.ItemContainerTheme>
