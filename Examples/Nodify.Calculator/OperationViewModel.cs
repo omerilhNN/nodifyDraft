@@ -28,6 +28,16 @@ namespace Nodify.Calculator
         //    set => SetProperty(ref _previous, value);
         //}
 
+        //<<<<<!!!!! Draft
+        private Type _subClassType;
+        public Type SubClassType
+        {
+            get => _subClassType;
+            set => SetProperty(ref _subClassType, value);   
+        }
+        //->>>>!!!!
+
+
         private void OnInputValueChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ConnectorViewModel.Value))

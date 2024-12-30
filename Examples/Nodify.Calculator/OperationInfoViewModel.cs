@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Nodify.Calculator
 {
@@ -12,13 +13,15 @@ namespace Nodify.Calculator
         Graph,
         CheckSame,
         CalculateArea,
-        RectangleSet
+        RectangleSet,
+        ChdFieldSet
     }
 
     public class OperationInfoViewModel
     {
         public string? Title { get; set; }
         public OperationType Type { get; set; }
+        public Type SubclassType { get; set; }
         public IOperation? Operation { get; set; }
         public List<string?> Input { get; } = new List<string?>();
         public uint MinInput { get; set; }

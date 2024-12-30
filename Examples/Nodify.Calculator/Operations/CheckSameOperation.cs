@@ -6,20 +6,22 @@ using System.Threading.Tasks;
 
 namespace Nodify.Calculator
 {
-    public class CheckSameOperation : IOperation
+    public class CheckSameOperation<T> : IOperation
     {
-        private readonly Func<double, double, bool> _func;
+        private readonly Func<T, T, bool> _func;
 
-        public CheckSameOperation(Func<double, double, bool> func) => _func = func;
+        public CheckSameOperation(Func<T, T, bool> func) => _func = func;
 
         public object Execute(params object[] operands)
         {
-            var param1 = Convert.ToDouble(operands[0]);
-            var param2 = Convert.ToDouble(operands[1]); 
+            if (operands[0] is T param1 && operands[1] is T param2)
+            {
+                return _func.Invoke(param1, param2);
+            }
 
-            return _func.Invoke(param1, param2);
+            throw new InvalidCastException($"Operands must be of type {typeof(T).Name}.");
         }
 
-        
+
     }
 }

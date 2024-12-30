@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DriverBase;
+using Nodify.Calculator.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -86,6 +88,8 @@ namespace Nodify.Calculator
 
             AvailableOperations = new NodifyObservableCollection<OperationInfoViewModel>(operations);
             CreateOperationCommand = new DelegateCommand<OperationInfoViewModel>(CreateOperation);
+            LoadSubclasses();
+
         }
 
         private void CreateOperation(OperationInfoViewModel operationInfo)
@@ -105,6 +109,23 @@ namespace Nodify.Calculator
                 }
             }
             Close();
+        }
+        private void LoadSubclasses()
+        {
+            var types = ReflectionTools.GetSubClasses<MsgAgent>();
+            foreach (var type in types)
+            {
+                var chdFields = ReflectionTools.GetCHDFields(type);
+                var viewModel = new OperationInfoViewModel
+                {
+                    Title = type.Name,
+                    Type = OperationType.ChdFieldSet, // Operation factory'de gerekli Case içerisine girmesi için
+                    SubclassType = type
+
+                };
+              
+                AvailableOperations.Add(viewModel);
+            }
         }
     }
 }

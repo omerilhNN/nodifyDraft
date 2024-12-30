@@ -1,8 +1,12 @@
-﻿using System;
+﻿using BSP_Drivers_Common_DD_DRIVER_TYPES;
+using DriverBase;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Windows;
+using Tmds.DBus.Protocol;
 
 namespace Nodify.Calculator
 {
@@ -12,6 +16,7 @@ namespace Nodify.Calculator
         {
             List<OperationInfoViewModel> result = new List<OperationInfoViewModel>();
 
+            //DELEGATE TANIMLAMALARI İLE RUNTİME'DA YAKALANIR VE ÇALIŞTIRILIR -> PERFORMANS ++++
             foreach (var method in container.GetMethods())
             {
                 if (method.IsStatic)
@@ -27,8 +32,24 @@ namespace Nodify.Calculator
                     bool generateInputNames = true;
 
                     op.Type = OperationType.Normal;
-
-                    if (para.Length == 2 )
+                    if(method.ReturnType == typeof(ChdViewModel))
+                    {
+                        var delType = typeof(Func<List<dynamic>, ChdViewModel>);
+                        var del = (Func<List<dynamic>, ChdViewModel>)Delegate.CreateDelegate(delType,method);
+                        op.Operation = new ChdSetOperation(del);
+                    }
+                    //2 parametresi CHD ViewModel 
+                    if(para.Length == 2 && para.All(p => p.ParameterType == typeof(ChdViewModel)))
+                    {
+                        //2 tane chd viewModel soktuğumuz CheckSame
+                        if(method.ReturnType == typeof(bool))
+                        {
+                            var delType = typeof(Func<ChdViewModel, ChdViewModel, bool>);
+                            var del = (Func<ChdViewModel, ChdViewModel, bool>)Delegate.CreateDelegate(delType, method);
+                            op.Operation = new CheckSameOperation<ChdViewModel>(del);
+                        }
+                    }
+                    if (para.Length == 2 && para.All(p => p.ParameterType == typeof(double)))
                     {
                         if(method.ReturnType == typeof(double))
                         {
@@ -41,7 +62,7 @@ namespace Nodify.Calculator
                         {
                             var delType = typeof(Func<double, double, bool>);
                             var del = (Func<double, double, bool>)Delegate.CreateDelegate(delType, method);
-                            op.Operation = new CheckSameOperation(del);
+                            op.Operation = new CheckSameOperation<double>(del);
                         }
                         if(method.ReturnType == typeof(RectangleViewModel))
                         {
@@ -144,50 +165,22 @@ namespace Nodify.Calculator
                 return new CheckSameOperationViewModel
                 {
                     Title = info.Title,
-                    Operation = info.Operation
+                    Operation = info.Operation,
+                    Output = new ConnectorViewModel()
                 };
-                case OperationType.Expression:
-                    return new ExpressionOperationViewModel
-                    {
-                        Title = info.Title,
-                        Output = new ConnectorViewModel(),
-                        Operation = info.Operation,
-                        Expression = "1 + sin {a} + cos {b}"
-                    };
-
                 case OperationType.Calculator:
                     return new CalculatorOperationViewModel
                     {
                         Title = info.Title,
                         Operation = info.Operation,
                     };
-
-                case OperationType.Expando:
-                    var o = new ExpandoOperationViewModel
-                    {
-                        MaxInput = info.MaxInput,
-                        MinInput = info.MinInput,
-                        Title = info.Title,
-                        Output = new ConnectorViewModel(),
-                        Operation = info.Operation
-                    };
-
-                    o.Input.AddRange(input);
-                    return o;
-
-                case OperationType.Group:
-                    return new OperationGroupViewModel
+                case OperationType.ChdFieldSet:
+                    return new ChdFieldSetOperationViewModel(info.SubclassType)
                     {
                         Title = info.Title,
+                        Operation = info.Operation,
+                        Output = new ConnectorViewModel()
                     };
-
-                case OperationType.Graph:
-                    return new OperationGraphViewModel
-                    {
-                        Title = info.Title,
-                        DesiredSize = new Size(420, 250)
-                    };
-
                 default:
                 {
                     var op = new OperationViewModel

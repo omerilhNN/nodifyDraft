@@ -15,7 +15,6 @@ namespace Nodify.Calculator
             });
 
 
-            Output = new ConnectorViewModel();
         }
         protected override void OnButtonClicked()
         {
