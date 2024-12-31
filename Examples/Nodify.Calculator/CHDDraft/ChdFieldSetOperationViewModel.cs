@@ -21,7 +21,18 @@ namespace Nodify.Calculator
 
                 foreach(var input in Input)
                 {
-                    chd.ChdInputFields.Add(input.Value);
+                    if(input != null && input.ValueType != null && input.Value != null)
+                    {
+                        try
+                        {
+                            chd.ChdInputFields.Add(input.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Failed to cast value '{input.Value}' of {input.Title} to {input.ValueType}: {ex.Message}");
+                            chd.ChdInputFields.Add(null); // Add the raw value if casting fails
+                        }
+                    }
                 }
                 Output.Value = chd;
             }
@@ -33,7 +44,6 @@ namespace Nodify.Calculator
             //var sub = ReflectionTools.GetSubClasses<MsgAgent>(); // MsgAgent'tan derive eden tüm subclassları alır -> 566 tane 
                 foreach (var chdField in chdFields)
                 {
-                    var fieldType = chdField.FieldType;
 
                 #region Generic yapma fikrinden vazgeçtim yorum satırları
                 //var connectorType = typeof(ConnectorViewModel<>).MakeGenericType(fieldType);
@@ -51,7 +61,7 @@ namespace Nodify.Calculator
 
                 Input.Add(new ConnectorViewModel
                 {
-                    ValueType = fieldType,
+                    ValueType = chdField.FieldType,
                     Title = chdField.Name // Set the field name as the title
                 });
             }

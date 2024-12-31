@@ -44,7 +44,7 @@ namespace Nodify.Calculator
             IsVisible = false;
         }
 
-        public NodifyObservableCollection<OperationInfoViewModel> AvailableOperations { get; }
+        public NodifyObservableCollection<OperationInfoViewModel> AvailableOperations { get; set; } = new NodifyObservableCollection<OperationInfoViewModel>();
         public INodifyCommand CreateOperationCommand { get; }
         private readonly CalculatorViewModel _calculator;
 
@@ -82,13 +82,18 @@ namespace Nodify.Calculator
                 {
                     Type = OperationType.RectangleSet,
                     Title = "Rectangle Set"
+                },
+                new OperationInfoViewModel
+                {
+                    Type = OperationType.ChdFieldSet,
+                    
                 }
             };
             operations.AddRange(OperationFactory.GetOperationsInfo(typeof(OperationsContainer)));
 
-            AvailableOperations = new NodifyObservableCollection<OperationInfoViewModel>(operations);
-            CreateOperationCommand = new DelegateCommand<OperationInfoViewModel>(CreateOperation);
+            AvailableOperations.AddRange(operations);
             LoadSubclasses();
+            CreateOperationCommand = new DelegateCommand<OperationInfoViewModel>(CreateOperation);
 
         }
 
@@ -121,7 +126,6 @@ namespace Nodify.Calculator
                     Title = type.Name,
                     Type = OperationType.ChdFieldSet, // Operation factory'de gerekli Case içerisine girmesi için
                     ParentClassType = type
-
                 };
               
                 AvailableOperations.Add(viewModel);

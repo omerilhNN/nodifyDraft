@@ -32,71 +32,80 @@ namespace Nodify.Calculator
                     bool generateInputNames = true;
 
                     op.Type = OperationType.Normal;
-                    if(method.ReturnType == typeof(ChdViewModel))
-                    {
-                        var delType = typeof(Func<List<dynamic>, ChdViewModel>);
-                        var del = (Func<List<dynamic>, ChdViewModel>)Delegate.CreateDelegate(delType,method);
-                        op.Operation = new ChdSetOperation(del);
-                    }
-                    //2 parametresi CHD ViewModel 
-                    if(para.Length == 2 && para.All(p => p.ParameterType == typeof(ChdViewModel)))
+                    //if (method.ReturnType == typeof(ChdViewModel))
+                    //{
+                    //    var delType = typeof(Func<List<dynamic>, ChdViewModel>);
+                    //    var del = (Func<List<dynamic>, ChdViewModel>)Delegate.CreateDelegate(delType, method);
+                    //    op.Type = OperationType.ChdFieldSet;
+                    //    op.Operation = new ChdSetOperation(del);
+                    //}
+                    ////2 parametresi CHD ViewModel
+                    //if (method.ReturnType == typeof(object) && method.GetParameters().Length == 1 &&
+                    //    method.GetParameters().First().ParameterType == typeof(List<object>))
+                    //{
+                    //    var delType = typeof(Func<List<object>, object>);
+                    //    var del = (Func<List<object>, object>)Delegate.CreateDelegate(delType, method);
+
+                    //    op.Operation = new ChdSetOperation(del);
+                    //}
+                    if (para.Length == 2 && para.All(p => p.ParameterType == typeof(Nodify.Calculator.ChdViewModel)))
                     {
                         //2 tane chd viewModel soktuğumuz CheckSame
-                        if(method.ReturnType == typeof(bool))
-                        {
-                            var delType = typeof(Func<ChdViewModel, ChdViewModel, bool>);
-                            var del = (Func<ChdViewModel, ChdViewModel, bool>)Delegate.CreateDelegate(delType, method);
-                            op.Operation = new CheckSameOperation<ChdViewModel>(del);
-                        }
+                        //if(method.ReturnType == typeof(bool))
+                        //{
+                        //    var delType = typeof(Func<ChdViewModel, ChdViewModel, bool>);
+                        //    var del = (Func<ChdViewModel, ChdViewModel, bool>)Delegate.CreateDelegate(delType, method);
+                        //    op.Operation = new CheckSameOperation<ChdViewModel>(del);
+                        //}
                     }
-                    if (para.Length == 2 && para.All(p => p.ParameterType == typeof(double)))
+                    if (para.Length == 2)
                     {
-                        if(method.ReturnType == typeof(double))
-                        {
-                            var delType = typeof(Func<double, double, double>);
-                            var del = (Func<double, double, double>)Delegate.CreateDelegate(delType, method);
+                        //if(method.ReturnType == typeof(double))
+                        //{
+                        //    var delType = typeof(Func<double, double, double>);
+                        //    var del = (Func<double, double, double>)Delegate.CreateDelegate(delType, method);
 
-                            op.Operation = new BinaryOperation(del);
-                        }
-                        if(method.ReturnType == typeof(bool))
-                        {
-                            var delType = typeof(Func<double, double, bool>);
-                            var del = (Func<double, double, bool>)Delegate.CreateDelegate(delType, method);
-                            op.Operation = new CheckSameOperation<double>(del);
-                        }
-                        if(method.ReturnType == typeof(RectangleViewModel))
-                        {
-                            var delType = typeof(Func<double,double, RectangleViewModel>);
-                            var del = (Func<double, double, RectangleViewModel>)Delegate.CreateDelegate(delType, method);
-                            op.Operation = new RectangleSetOperation(del);
-                        }
+                        //    op.Operation = new BinaryOperation(del);
+                        //}
+                        //if(method.ReturnType == typeof(bool))
+                        //{
+                        //    var delType = typeof(Func<double, double, bool>);
+                        //    var del = (Func<double, double, bool>)Delegate.CreateDelegate(delType, method);
+                        //    op.Operation = new CheckSameOperation<double>(del);
+                        //}
+                        //if(method.ReturnType == typeof(RectangleViewModel))
+                        //{
+                        //    var delType = typeof(Func<double,double, RectangleViewModel>);
+                        //    var del = (Func<double, double, RectangleViewModel>)Delegate.CreateDelegate(delType, method);
+                        //    op.Operation = new RectangleSetOperation(del);
+                        //}
                     }
                     else if (para.Length == 1)
                     {
-                        if ( para[0].ParameterType == typeof(RectangleViewModel)
-                        && method.ReturnType == typeof(double))
-                        {
-                            var delType = typeof(Func<RectangleViewModel, double>);
-                            var del = (Func<RectangleViewModel, double>)Delegate.CreateDelegate(delType, method);
-                            op.Operation = new CalculateAreaOperation(del);
-                        }
-                        if (para[0].ParameterType.IsArray)
-                        {
-                            op.Type = OperationType.Expando;
+                        //if ( para[0].ParameterType == typeof(RectangleViewModel)
+                        //&& method.ReturnType == typeof(double))
+                        //{
+                        //    var delType = typeof(Func<RectangleViewModel, double>);
+                        //    var del = (Func<RectangleViewModel, double>)Delegate.CreateDelegate(delType, method);
+                        //    op.Operation = new CalculateAreaOperation(del);
+                        //}
+                        //if (para[0].ParameterType.IsArray)
+                        //{
+                        //    op.Type = OperationType.Expando;
 
-                            var delType = typeof(Func<double[], double>);
-                            var del = (Func<double[], double>)Delegate.CreateDelegate(delType, method);
+                        //    var delType = typeof(Func<double[], double>);
+                        //    var del = (Func<double[], double>)Delegate.CreateDelegate(delType, method);
 
-                            op.Operation = new ParamsOperation(del);
-                            op.MaxInput = int.MaxValue;
-                        }
-                        else
-                        {
-                            var delType = typeof(Func<double, double>);
-                            var del = (Func<double, double>)Delegate.CreateDelegate(delType, method);
+                        //    op.Operation = new ParamsOperation(del);
+                        //    op.MaxInput = int.MaxValue;
+                        //}
+                        //else
+                        //{
+                        //    var delType = typeof(Func<double, double>);
+                        //    var del = (Func<double, double>)Delegate.CreateDelegate(delType, method);
 
-                            op.Operation = new UnaryOperation(del);
-                        }
+                        //    op.Operation = new UnaryOperation(del);
+                        //}
                     }
                 
 
@@ -166,7 +175,10 @@ namespace Nodify.Calculator
                 {
                     Title = info.Title,
                     Operation = info.Operation,
-                    Output = new ConnectorViewModel()
+                    Output = new ConnectorViewModel
+                    {
+                       ValueType = typeof(Boolean)
+                    }
                 };
                 case OperationType.Calculator:
                     return new CalculatorOperationViewModel
@@ -175,11 +187,15 @@ namespace Nodify.Calculator
                         Operation = info.Operation,
                     };
                 case OperationType.ChdFieldSet:
-                    return new ChdFieldSetOperationViewModel(info.SubclassType)
+                    return new ChdFieldSetOperationViewModel(info.ParentClassType)
                     {
                         Title = info.Title,
                         Operation = info.Operation,
-                        Output = new ConnectorViewModel()
+                        Output = new ConnectorViewModel
+                        {
+                            ValueType = typeof(ChdViewModel)
+                        }
+
                     };
                 default:
                 {

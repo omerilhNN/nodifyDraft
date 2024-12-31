@@ -19,25 +19,45 @@ namespace Nodify.Calculator
             get => _value;
             set
             {
-                if (value != null && ValueType != null)
+#region Typecasting denemeler
+                //if (value != null && ValueType != null)
+                //{
+                //    try
+                //    {
+                //        _value = Convert.ChangeType(value, ValueType); // Dynamic casting
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        Console.WriteLine($"Failed to cast value to {ValueType}: {ex.Message}");
+                //        _value = null; // Reset value if cast fails
+                //    }
+                //}
+                //else
+                //{
+                //    _value = value; // Assign directly if ValueType is not set
+                //}
+
+                //SetProperty(ref _value, value)
+                //    .Then(() => ValueObservers.ForEach(o => Convert.ChangeType(_value,ValueType)));
+#endregion
+                if(value != null && ValueType != null)
                 {
                     try
                     {
-                        _value = Convert.ChangeType(value, ValueType); // Dynamic casting
-                    }
-                    catch (Exception ex)
+                    var castedValue = Convert.ChangeType(value, ValueType);
+                    SetProperty(ref _value, castedValue)
+                        .Then(() => ValueObservers.ForEach(o => o.Value = castedValue));
+                    }catch(Exception ex)
                     {
-                        Console.WriteLine($"Failed to cast value to {ValueType}: {ex.Message}");
-                        _value = null; // Reset value if cast fails
+                        Console.WriteLine("Failed to cast");
+
                     }
                 }
                 else
                 {
-                    _value = value; // Assign directly if ValueType is not set
+                    SetProperty(ref _value, value)
+                        .Then(() => ValueObservers.ForEach(o=> o.Value = value));
                 }
-
-                SetProperty(ref _value, _value)
-                    .Then(() => ValueObservers.ForEach(o => o.Value = _value));
             }
         }
         private Type? _valueType;
