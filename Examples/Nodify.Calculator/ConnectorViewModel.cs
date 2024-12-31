@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace Nodify.Calculator
@@ -16,8 +17,34 @@ namespace Nodify.Calculator
         public object? Value
         {
             get => _value;
-            set => SetProperty(ref _value, value)
-                .Then(() => ValueObservers.ForEach(o => o.Value = value));
+            set
+            {
+                if (value != null && ValueType != null)
+                {
+                    try
+                    {
+                        _value = Convert.ChangeType(value, ValueType); // Dynamic casting
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to cast value to {ValueType}: {ex.Message}");
+                        _value = null; // Reset value if cast fails
+                    }
+                }
+                else
+                {
+                    _value = value; // Assign directly if ValueType is not set
+                }
+
+                SetProperty(ref _value, _value)
+                    .Then(() => ValueObservers.ForEach(o => o.Value = _value));
+            }
+        }
+        private Type? _valueType;
+        public Type? ValueType
+        {
+            get => _valueType;
+            set => SetProperty(ref _valueType, value);
         }
 
         private bool _isConnected;

@@ -60,26 +60,55 @@ namespace Nodify.Calculator.Helpers
 
             return type.IsClass && type.IsSubclassOf(baseType);
         }
-        public static bool ArePropertiesEqual<T>(T obj1, T obj2)
+        
+        public static void GetChdFieldTypesAndValues(object inputObject)
         {
-            if (obj1 == null || obj2 == null) return false;
+            if (inputObject == null) return;
+            var chdType = inputObject.GetType();
 
-            var properties = typeof(T).GetProperties();
-            foreach (var property in properties)
+        }
+        
+        public static bool PublicInstancePropertiesEqual<T>(T self, T to, params string[] ignore) where T : class
+        {
+            if (self != null && to != null)
             {
-                var value1 = property.GetValue(obj1);
-                var value2 = property.GetValue(obj2);
+                Type type = typeof(T);
+                List<string> ignoreList = new List<string>(ignore);
+                foreach (System.Reflection.PropertyInfo pi in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                {
+                    if (!ignoreList.Contains(pi.Name))
+                    {
+                        object selfValue = type.GetProperty(pi.Name).GetValue(self, null);
+                        object toValue = type.GetProperty(pi.Name).GetValue(to, null);
 
-                if (value1 is IEnumerable<object> enumerable1 && value2 is IEnumerable<object> enumerable2)
-                {
-                    if (!enumerable1.SequenceEqual(enumerable2)) return false;
+                        if (selfValue != toValue && (selfValue == null || !selfValue.Equals(toValue)))
+                        {
+                            return false;
+                        }
+                    }
                 }
-                else if (!Equals(value1, value2))
+                return true;
+            }
+            return self == to;
+        }
+        public static Type GetUnderlyingType(this MemberInfo member)
+            {
+                switch (member.MemberType)
                 {
-                    return false;
+                    case MemberTypes.Event:
+                        return ((EventInfo)member).EventHandlerType;
+                    case MemberTypes.Field:
+                        return ((FieldInfo)member).FieldType;
+                    case MemberTypes.Method:
+                        return ((MethodInfo)member).ReturnType;
+                    case MemberTypes.Property:
+                        return ((PropertyInfo)member).PropertyType;
+                    default:
+                        throw new ArgumentException
+                        (
+                           "Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"
+                        );
                 }
             }
-            return true;
         }
-    }
 }

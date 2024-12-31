@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Nodify.Calculator
 {
@@ -29,7 +30,8 @@ namespace Nodify.Calculator
                     if (Output != null)
                     {
                         // Output.Value'ı IsSuccess'e eşitle
-                        Output.Value = IsSuccess;
+                        Output.Value = (bool)IsSuccess;
+
                     }
                 }
                 catch
@@ -37,7 +39,8 @@ namespace Nodify.Calculator
                     IsSuccess = false;
                     if (Output != null)
                     {
-                        Output.Value = IsSuccess;
+                        Output.Value = (bool)IsSuccess;
+                        Convert.ToBoolean(Output.Value);
                     }
                 }
             }

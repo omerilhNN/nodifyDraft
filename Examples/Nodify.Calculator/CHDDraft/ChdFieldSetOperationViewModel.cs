@@ -1,4 +1,5 @@
 ﻿using DriverBase;
+using Microsoft.VisualBasic.FileIO;
 using Nodify.Calculator.Helpers;
 using System;
 using System.Collections.Generic;
@@ -12,8 +13,6 @@ namespace Nodify.Calculator
     {
         public ChdFieldSetOperationViewModel(Type opType) {
             CreateInputsFromChdFields(opType);
-
-        
         }
         protected override void OnButtonClicked()
         {
@@ -34,12 +33,28 @@ namespace Nodify.Calculator
             //var sub = ReflectionTools.GetSubClasses<MsgAgent>(); // MsgAgent'tan derive eden tüm subclassları alır -> 566 tane 
                 foreach (var chdField in chdFields)
                 {
-                    Input.Add(new ConnectorViewModel
-                    {
-                        Title = chdField.Name, // Set the field name as the title
-                        // Value can be set later when needed
-                     });
-                }
+                    var fieldType = chdField.FieldType;
+
+                #region Generic yapma fikrinden vazgeçtim yorum satırları
+                //var connectorType = typeof(ConnectorViewModel<>).MakeGenericType(fieldType);
+                //var connectorInstance = Activator.CreateInstance(connectorType);
+
+                //var titleProperty = connectorType.GetProperty("Title");
+                //titleProperty?.SetValue(connectorInstance, chdField.Name);
+
+                //var addMethod = typeof(NodifyObservableCollection<>)
+                //    .MakeGenericType(connectorType)
+                //    .GetMethod("Add");
+
+                //addMethod.Invoke(Input, new[] { connectorInstance});
+                #endregion
+
+                Input.Add(new ConnectorViewModel
+                {
+                    ValueType = fieldType,
+                    Title = chdField.Name // Set the field name as the title
+                });
+            }
             
         }
     }

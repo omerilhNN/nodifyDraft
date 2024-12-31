@@ -120,7 +120,7 @@ namespace Nodify.Calculator
                 {
                     Title = type.Name,
                     Type = OperationType.ChdFieldSet, // Operation factory'de gerekli Case içerisine girmesi için
-                    SubclassType = type
+                    ParentClassType = type
 
                 };
               
