@@ -1,13 +1,17 @@
-﻿using Nodify.Calculator.CodeGenerationTools;
+﻿using DriverBase;
+using Nodify.Calculator.CodeGenerationTools;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Nodify.Calculator
 {
@@ -115,6 +119,7 @@ namespace Nodify.Calculator
             set => SetProperty(ref _selectedOperations, value);
         }
 
+        
         public NodifyObservableCollection<ConnectionViewModel> Connections { get; } = new NodifyObservableCollection<ConnectionViewModel>();
         public PendingConnectionViewModel PendingConnection { get; set; } = new PendingConnectionViewModel();
         public OperationsMenuViewModel OperationsMenu { get; set; }
@@ -140,7 +145,6 @@ namespace Nodify.Calculator
                 await ExecuteOperationAsync(operation);
             }
             var generatedCode = GenerateCodeFromOperations(sortedOperations);
-
             var directoryPath = Path.Combine("..", "..", "..", "GeneratedCode");
             var filePath = Path.Combine(directoryPath, "GeneratedOperationsCode_GEN.cs");
 
@@ -150,7 +154,101 @@ namespace Nodify.Calculator
             }
 
             File.WriteAllText(filePath, generatedCode);
+
+            var assembly = CompileCode(filePath);
+            await ExecuteMethod(assembly, "TC_GENERATED_OMER", "TCF_OFI");
         }
+        private Assembly CompileCode(string filePath)
+        {
+            var code = File.ReadAllText(filePath);
+
+            var syntaxTree = CSharpSyntaxTree.ParseText(code);
+            var references = new List<MetadataReference>
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
+                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location), // System.Linq
+
+        // Add reference to System.Runtime
+                MetadataReference.CreateFromFile(Path.Combine(
+                    System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(),
+                    "System.Runtime.dll")),
+
+        // Add reference to Nodify.Calculator
+                MetadataReference.CreateFromFile(@"Nodify.Calculator.dll"),
+                MetadataReference.CreateFromFile(@"DriverBase.dll"),
+                MetadataReference.CreateFromFile(@"Octopus.dll"),
+                MetadataReference.CreateFromFile(@"OctopusDriverBase.dll"),
+        // Add reference to OctopusDriverBase
+    };
+        
+
+
+            // Validate that all references exist
+            foreach (var reference in references)
+            {
+                if (!File.Exists(reference.Display))
+                {
+                    throw new FileNotFoundException($"Reference not found: {reference.Display}");
+                }
+            }
+
+            var compilation = CSharpCompilation.Create("GeneratedAssembly")
+                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                .AddReferences(references)
+                .AddSyntaxTrees(syntaxTree);
+
+
+            using (var ms = new MemoryStream()) 
+            { 
+                var result = compilation.Emit(ms); //derleme işleminin sonucunu MemoryStream gibi bir belleğe yazma işlemini gerçekleştirir- Emit
+                if (!result.Success)
+                {
+                    var errors = result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(d=> d.ToString());
+                    throw new InvalidOperationException($"COMPILATION FAILED" + string.Join("\n",errors));
+                }
+                ms.Seek(0, SeekOrigin.Begin);
+                return Assembly.Load(ms.ToArray());  // bellekte derlenmiş kodu yükleyerek çalışma zamanında kullanılabilir hale getirir
+            }
+        }
+        private async Task ExecuteMethod(Assembly assembly, string className,string methodName)
+        {
+            var type = assembly.GetType(className);
+            if(type == null)
+            {
+                throw new InvalidOperationException($"{className} doesn't exist");
+            }
+
+            var method = type.GetMethod(methodName);    
+            if(method == null)
+            {
+                throw new InvalidOperationException($"Method {methodName} not found");
+            }
+
+            object instance = null;
+            if (!method.IsStatic)
+            {
+                instance = Activator.CreateInstance(type);
+                if (instance == null)
+                {
+                    throw new InvalidOperationException($"Failed to create an instance of class '{className}'.");
+                }
+            }
+            // Invoke the method
+            try
+            {
+                method.Invoke(instance, null);
+            }
+            catch (TargetInvocationException ex)
+            {
+                Console.WriteLine($"Inner Exception Message: {ex.InnerException?.Message}");
+                Console.WriteLine($"Inner Exception Stack Trace: {ex.InnerException?.StackTrace}");
+                throw;
+            }
+        }
+
+        //Ekrana bırakılan operationların asenkron çalıştırılması
         private async Task ExecuteOperationAsync(OperationViewModel operation)
         {
             #region TASK COMPLETION ROUTINE HALİ
@@ -221,7 +319,8 @@ namespace Nodify.Calculator
                 Console.WriteLine($"Error executing operation {operation.GetType().Name}: {ex.Message}");
             }
         }
-        /// !!!!! HIEARCHIAL OPERATION EXECUTION
+        
+        /// !! Operationları Dependencylerine göre sıralama işlemi
         private IEnumerable<OperationViewModel> TopologicalSort(IEnumerable<OperationViewModel>  operations)
         {
             var sorted = new List<OperationViewModel>();
@@ -277,8 +376,7 @@ namespace Nodify.Calculator
                 await ExecuteOperationAsync(dependentOperation); // Her dependent operasyon asenkron çalıştır
             }
         }
-
-
+        ///IEnumerable -> LazyEvaluation var - kodun veri kaynağına bağımlılığı azaltılır veri kaynağı değişse de bir sorun yaratmaz 
         /// <-!!!!!!
         /// CODE GENERATION YAPILACAK ALAN
         private string GenerateCodeFromOperations(IEnumerable<OperationViewModel> sortedOperations)
@@ -334,6 +432,16 @@ namespace Nodify.Calculator
                         Spec.CFR($@""[REQ];
                         Verify result to DRIVER_INVALID_PARAMETER.""));");
                 }
+                else if (operation is ChdFieldSetOperationViewModel chdFieldSet)
+                {
+                    sb.AppendLine($@"           var msgo = new {chdFieldSet.ValueNamespace}.{chdFieldSet.Title}();");
+                    foreach(var input in chdFieldSet.Input)
+                    {
+                        sb.AppendLine($@"           msgo.chd.{input.Title} = {input.Value};");
+                    }
+                    sb.AppendLine($@"           uut.SendMsg(msgo);");
+                    sb.AppendLine($@"           var msgi = uut.GetMsg<{chdFieldSet.ValueNamespace}.{chdFieldSet.Title}>();");
+                }
             }
             sb.AppendLine("}");
 
@@ -354,8 +462,6 @@ namespace Nodify.Calculator
         }
 
         /// !!!!->
-
-
         private void DisconnectConnector(ConnectorViewModel connector)
         {
             var connections = Connections.Where(c => c.Input == connector || c.Output == connector).ToList();

@@ -16,11 +16,12 @@
     
     
     <UserControl.Resources>
+        <!--CONVERTER Declarations-->
         <local:BoolToBrushConverter x:Key ="BoolToBrushConverter"/>
         <local:SuccessFailureBrushConverter x:Key="SuccessFailureBrushConverter" />
         <local:SuccessFailureBackgroundConverter x:Key="SuccessFailureBackgroundConverter" />
-
-
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <!--Converters END-->
 
         <GeometryDrawing x:Key="SmallGridGeometry"
                          Geometry="M0,0 L0,1 0.03,1 0.03,0.03 1,0.03 1,0 Z"
@@ -219,12 +220,18 @@
                     <Setter Property="HeaderTemplate">
                         <Setter.Value>
                             <DataTemplate DataType="{x:Type local:ConnectorViewModel}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Title}"
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Title}"
                                                VerticalAlignment="Center"
                                                Margin="0 0 5 0" />
-                                    <TextBox Text="{Binding Value}"
+                                        <TextBox Text="{Binding Value}"
                                              IsVisible="{Binding !IsConnected}" />
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding ValidationMessage}"
+                                               Foreground="Red"
+                                               FontSize="12"
+                                               IsVisible="{Binding ValidationMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </Setter.Value>

@@ -59,12 +59,28 @@ namespace Nodify.Calculator
             get => _size;
             set => SetProperty(ref _size, value);
         }
+        //private UutMng uut = new UutMng();
+        //public UutMng UUT
+        //{
+
+        //    get => (UutMng)uut;
+        //    set => SetProperty(ref uut, value);
+        //}
 
         private string? _title;
         public string? Title
         {
             get => _title;
             set => SetProperty(ref _title, value);
+        }
+        private string? _valueNamespace;
+        public string? ValueNamespace
+        {
+            get => _valueNamespace;
+            set
+            {
+                SetProperty(ref _valueNamespace, value);
+            }
         }
 
         private bool? _isSuccess;
@@ -79,6 +95,7 @@ namespace Nodify.Calculator
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
         }
+      
 
         public bool IsReadOnly { get; set; }
 
@@ -88,7 +105,6 @@ namespace Nodify.Calculator
             get => _operation;
             set => SetProperty(ref _operation, value)
                    .Then(OnInputValueChanged);
-            
         }
       
 
@@ -111,7 +127,7 @@ namespace Nodify.Calculator
             OnButtonClicked(); //Mevcut operasyon çalıştırılır
             TriggerDependentOperations(); // Mevcut operasyona bağlı operasyonlar asenkron olarak tetiklenir.
         }
-
+      
         protected virtual void OnButtonClicked()
         {
             if (Output != null && Operation != null)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace Nodify.Calculator
@@ -12,7 +13,6 @@ namespace Nodify.Calculator
             get => _title;
             set => SetProperty(ref _title, value);
         }
-
         private object? _value;
         public object? Value
         {
@@ -47,10 +47,13 @@ namespace Nodify.Calculator
                     var castedValue = Convert.ChangeType(value, ValueType);
                     SetProperty(ref _value, castedValue)
                         .Then(() => ValueObservers.ForEach(o => o.Value = castedValue));
-                    }catch(Exception ex)
+                    ValidationMessage = null;
+                    }
+                    catch(Exception ex)
                     {
-                        Console.WriteLine("Failed to cast");
-
+                        Console.WriteLine($"Invalid cast to {ValueType} : {ex.Message}");
+                        ValidationMessage = $"{ex.Message} Requires {ValueType.Name} type.";
+                        SetProperty(ref _value, null);
                     }
                 }
                 else
@@ -58,6 +61,15 @@ namespace Nodify.Calculator
                     SetProperty(ref _value, value)
                         .Then(() => ValueObservers.ForEach(o=> o.Value = value));
                 }
+            }
+        }
+        private string? _validationMessage;
+        public string? ValidationMessage
+        {
+            get => _validationMessage;
+            set
+            {
+                SetProperty(ref _validationMessage, value);
             }
         }
         private Type? _valueType;

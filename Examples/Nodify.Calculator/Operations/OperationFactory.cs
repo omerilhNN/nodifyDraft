@@ -190,6 +190,7 @@ namespace Nodify.Calculator
                     return new ChdFieldSetOperationViewModel(info.ParentClassType)
                     {
                         Title = info.Title,
+                        ValueNamespace = info.ValueNamespace,
                         Operation = info.Operation,
                         Output = new ConnectorViewModel
                         {

@@ -124,6 +124,7 @@ namespace Nodify.Calculator
                 var viewModel = new OperationInfoViewModel
                 {
                     Title = type.Name,
+                    ValueNamespace = type.Namespace,
                     Type = OperationType.ChdFieldSet, // Operation factory'de gerekli Case içerisine girmesi için
                     ParentClassType = type
                 };

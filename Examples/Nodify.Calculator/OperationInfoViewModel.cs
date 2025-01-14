@@ -20,6 +20,7 @@ namespace Nodify.Calculator
     public class OperationInfoViewModel
     {
         public string? Title { get; set; }
+        public string? ValueNamespace { get; set; }
         public OperationType Type { get; set; }
         public Type ParentClassType { get; set; }
         public IOperation? Operation { get; set; }
