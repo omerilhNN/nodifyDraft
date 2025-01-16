@@ -2,7 +2,6 @@ using System;
 using DriverBase;
 using DriverBase_Platform;
 using Octopus;
-using Nodify.Calculator;
 public class TC_GENERATED_OMER : AbsTesterDriver
 {
 static Octolog Log = new Octolog();
@@ -24,11 +23,10 @@ public void Setup(){
 public void TCF_OFI()
 {
 Setup();
-           var msgo = new DriverBase_Platform.FuncMsg.phy.phy_setDuplex();
-           msgo.chd.phyId = ;
-           msgo.chd.duplex = ;
-           msgo.chd.DriverReturn = ;
+           var msgo = new DriverBase_Platform.FuncMsg.phy_T1042_private.findPhy();
+           msgo.chd.phyId = 1;
+           msgo.chd.DriverReturn = 1;
            uut.SendMsg(msgo);
-           var msgi = uut.GetMsg<DriverBase_Platform.FuncMsg.phy.phy_setDuplex>();
+           var msgi = uut.GetMsg<DriverBase_Platform.FuncMsg.phy_T1042_private.findPhy>();
 }
 }

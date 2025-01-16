@@ -31,6 +31,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nodify.Shapes.Desktop", "Ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DriverBase", "..\..\DriverTAI\Tests\C130\Tests\Drivers\DriverBase\DriverBase.csproj", "{39382130-52F2-4840-ADDE-00E13A599413}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCase", "TestCase\TestCase.csproj", "{886C6E22-5B4F-4A74-A311-01BDB058B13C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OctopusDriverBase", "..\..\DriverTAI\octopus\OctopusDriverBase\OctopusDriverBase.csproj", "{29FF5C42-A65D-4357-A0B4-9AA1F8F921FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Octopus", "..\..\DriverTAI\octopus\octopus\Octopus.csproj", "{5C3AE2C4-C506-4F21-B26F-9CA0BF262741}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +79,18 @@ Global
 		{39382130-52F2-4840-ADDE-00E13A599413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39382130-52F2-4840-ADDE-00E13A599413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39382130-52F2-4840-ADDE-00E13A599413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886C6E22-5B4F-4A74-A311-01BDB058B13C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886C6E22-5B4F-4A74-A311-01BDB058B13C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886C6E22-5B4F-4A74-A311-01BDB058B13C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886C6E22-5B4F-4A74-A311-01BDB058B13C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29FF5C42-A65D-4357-A0B4-9AA1F8F921FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29FF5C42-A65D-4357-A0B4-9AA1F8F921FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29FF5C42-A65D-4357-A0B4-9AA1F8F921FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29FF5C42-A65D-4357-A0B4-9AA1F8F921FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C3AE2C4-C506-4F21-B26F-9CA0BF262741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C3AE2C4-C506-4F21-B26F-9CA0BF262741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C3AE2C4-C506-4F21-B26F-9CA0BF262741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C3AE2C4-C506-4F21-B26F-9CA0BF262741}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +103,7 @@ Global
 		{BAD92DB9-BDCA-4BB7-8F24-B7D3FE470476} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 		{8F4D5A6D-CA3A-4C0C-9597-7D0E2EDFAB21} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 		{D53C27C4-C49D-40DD-87BB-CC6431999BF8} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
+		{886C6E22-5B4F-4A74-A311-01BDB058B13C} = {E467F53A-3CCA-4EDB-BD33-FC89CA3C526B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9E59DB6-FB93-48F3-A8E0-1E549009E043}

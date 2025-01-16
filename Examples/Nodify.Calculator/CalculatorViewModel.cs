@@ -4,14 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Nodify.Calculator
 {
@@ -25,7 +24,7 @@ namespace Nodify.Calculator
         {
             Instance = this;
             _droppedOperations = new ObservableCollection<OperationViewModel>();
-            ExecuteAllOperationsAndGenerateCodeCommand = new AsyncDelegateCommand(ExecuteAllOperationsAndGenerateCode);
+            ExecuteAllOperationsAndGenerateCodeCommand = new DelegateCommand(ExecuteAllOperationsAndGenerateCode);
 
             CreateConnectionCommand = new DelegateCommand<ConnectorViewModel>(
                 _ => CreateConnection(PendingConnection.Source, PendingConnection.Target),
@@ -133,7 +132,7 @@ namespace Nodify.Calculator
         public INodifyCommand ExecuteAllOperationsAndGenerateCodeCommand { get; }
         public INodifyCommand GenerateCodeCommand { get; }
         //!!!!! ELLE EKLEDİM : ExecuteAllOperations
-        private async Task ExecuteAllOperationsAndGenerateCode()
+        private void ExecuteAllOperationsAndGenerateCode()
         {
           //!!! REVERSE için Açıklama !!!
           //CODE GENERATION'DA nodelardan generate edilen kod ters sırada yazılıyordu bunun önüne geçmek için REVERSE metodu eklendi!!!!
@@ -142,114 +141,84 @@ namespace Nodify.Calculator
 
             foreach (var operation in sortedOperations)
             {
-                await ExecuteOperationAsync(operation);
+                operation.ExecuteOperation();
             }
             var generatedCode = GenerateCodeFromOperations(sortedOperations);
-            var directoryPath = Path.Combine("..", "..", "..", "GeneratedCode");
-            var filePath = Path.Combine(directoryPath, "GeneratedOperationsCode_GEN.cs");
+            var directoryPath = Path.Combine("..", "..", "..", "..","..","TestCase");
+            var filePath = Path.Combine(directoryPath, "TC_OFI_GEN.cs");
 
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
             }
-
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            
             File.WriteAllText(filePath, generatedCode);
 
-            var assembly = CompileCode(filePath);
-            await ExecuteMethod(assembly, "TC_GENERATED_OMER", "TCF_OFI");
-        }
-        private Assembly CompileCode(string filePath)
-        {
-            var code = File.ReadAllText(filePath);
 
-            var syntaxTree = CSharpSyntaxTree.ParseText(code);
-            var references = new List<MetadataReference>
+            string sourceDirectory = @"c:\gitco\project_name_deneme1\NODIFY-BASE\TestCase";
+            string sourceFile = Path.Combine(sourceDirectory, "TC_OFI_GEN.cs");
+            string outputDirectory = Path.Combine(sourceDirectory, "..", "..","..","DriverTAI","Bin");
+
+            var compileProcess = new Process();
+            compileProcess.StartInfo.FileName = "dotnet";
+            compileProcess.StartInfo.Arguments = $"build {sourceDirectory}\\TestCase.csproj -o {outputDirectory}";
+            compileProcess.StartInfo.UseShellExecute = false;
+            compileProcess.StartInfo.RedirectStandardOutput = true;
+            compileProcess.StartInfo.RedirectStandardError = true;
+
+            Console.WriteLine("Compiling TC_OFI_GEN.cs...");
+            compileProcess.Start();
+            string compileOutput = compileProcess.StandardOutput.ReadToEnd();
+            string compileError = compileProcess.StandardError.ReadToEnd();
+            compileProcess.WaitForExit();
+
+            if (compileProcess.ExitCode != 0)
             {
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location), // System.Private.CoreLib
-                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location), // System.Console
-                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location), // System.Linq
+                Console.WriteLine($"Compilation failed:\n{compileError}");
+            }
 
-        // Add reference to System.Runtime
-                MetadataReference.CreateFromFile(Path.Combine(
-                    System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(),
-                    "System.Runtime.dll")),
+            Console.WriteLine($"Compilation successful:\n{compileOutput}");
+            string outputExe = Path.Combine(outputDirectory, "TestCase.exe");
 
-        // Add reference to Nodify.Calculator
-                MetadataReference.CreateFromFile(@"Nodify.Calculator.dll"),
-                MetadataReference.CreateFromFile(@"DriverBase.dll"),
-                MetadataReference.CreateFromFile(@"Octopus.dll"),
-                MetadataReference.CreateFromFile(@"OctopusDriverBase.dll"),
-        // Add reference to OctopusDriverBase
-    };
-        
-
-
-            // Validate that all references exist
-            foreach (var reference in references)
+            if (!File.Exists(outputExe))
             {
-                if (!File.Exists(reference.Display))
+                Console.WriteLine($"Error: {outputExe} does not exist. Did you publish the project as an executable?");
+                return;
+            }
+
+            var testCaseProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
                 {
-                    throw new FileNotFoundException($"Reference not found: {reference.Display}");
+                    FileName = outputExe,
+                    Arguments = "-c WIN -r TCF_OFI",
+                    WorkingDirectory = outputDirectory, // Compile edilme sonucu oluşan .exe path
+                    UseShellExecute = false,
+                    RedirectStandardError = true
                 }
+            
+            };
+            Console.WriteLine("Running TestCase.exe...");
+            testCaseProcess.Start();
+            var error = testCaseProcess.StandardError.ReadToEnd();
+            testCaseProcess.WaitForExit();
+
+            if (testCaseProcess.ExitCode != 0)
+            {
+                
+            }
+            else
+            {
             }
 
-            var compilation = CSharpCompilation.Create("GeneratedAssembly")
-                .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                .AddReferences(references)
-                .AddSyntaxTrees(syntaxTree);
-
-
-            using (var ms = new MemoryStream()) 
-            { 
-                var result = compilation.Emit(ms); //derleme işleminin sonucunu MemoryStream gibi bir belleğe yazma işlemini gerçekleştirir- Emit
-                if (!result.Success)
-                {
-                    var errors = result.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)
-                        .Select(d=> d.ToString());
-                    throw new InvalidOperationException($"COMPILATION FAILED" + string.Join("\n",errors));
-                }
-                ms.Seek(0, SeekOrigin.Begin);
-                return Assembly.Load(ms.ToArray());  // bellekte derlenmiş kodu yükleyerek çalışma zamanında kullanılabilir hale getirir
-            }
+            Console.WriteLine("Build process completed.");
         }
-        private async Task ExecuteMethod(Assembly assembly, string className,string methodName)
-        {
-            var type = assembly.GetType(className);
-            if(type == null)
-            {
-                throw new InvalidOperationException($"{className} doesn't exist");
-            }
-
-            var method = type.GetMethod(methodName);    
-            if(method == null)
-            {
-                throw new InvalidOperationException($"Method {methodName} not found");
-            }
-
-            object instance = null;
-            if (!method.IsStatic)
-            {
-                instance = Activator.CreateInstance(type);
-                if (instance == null)
-                {
-                    throw new InvalidOperationException($"Failed to create an instance of class '{className}'.");
-                }
-            }
-            // Invoke the method
-            try
-            {
-                method.Invoke(instance, null);
-            }
-            catch (TargetInvocationException ex)
-            {
-                Console.WriteLine($"Inner Exception Message: {ex.InnerException?.Message}");
-                Console.WriteLine($"Inner Exception Stack Trace: {ex.InnerException?.StackTrace}");
-                throw;
-            }
-        }
-
         //Ekrana bırakılan operationların asenkron çalıştırılması
-        private async Task ExecuteOperationAsync(OperationViewModel operation)
+        private void ExecuteOperationAsync(OperationViewModel operation)
         {
             #region TASK COMPLETION ROUTINE HALİ
             //if (operation != null)
@@ -304,15 +273,11 @@ namespace Nodify.Calculator
 
             try
             {
-                await Task.Run(() =>
-                {
                     operation.ExecuteOperation(); // Perform the operation logic
                     PropagateValues(operation);  // Ensure values propagate
-                });
-
-                await Task.Delay(100);
-
-                await TriggerDependentOperationsAsync(operation);
+                //ASENKRONLUK KALDIRILDI
+                //await.Task Run ile aşağıdaki fonks yukarıdaki ile birleştiriliyordu
+                //await TriggerDependentOperationsAsync(operation);
             }
             catch (Exception ex)
             {
@@ -343,10 +308,6 @@ namespace Nodify.Calculator
                     sorted.Add(operation);
                 }
             }
-            //foreach(var operation in operations)
-            //{
-            //    Visit(operation);
-            //}
             foreach (var operation in operations)
             {
                 if (!Connections.Any(c => c.Input.Operation == operation))
@@ -358,24 +319,32 @@ namespace Nodify.Calculator
 
         }
 
+        
+        
+        #region ASENKRONLUK KALDIRILDI 
+        // private async Task ExecuteAllOperationsAndGenerateCode() -- AsyncDelegateCommand yerine DelegateCommand - ExecuteOperationAsync yerine normal Execute
         //Bir operasyonun çıtkısına bağlı olarak diğer operasyonları asenkron olarak tetiklemek ve sıralı bir şekilde yürütmek için
-        private async Task TriggerDependentOperationsAsync(OperationViewModel operation)
-        {
-            if (operation == null) return;
+        //private async Task TriggerDependentOperationsAsync(OperationViewModel operation)
+        //{
+        //    if (operation == null) return;
 
-            //Connections: Tüm bağlantılar
-            // Çıkışı şu anki operasyondan üretilen -- Girişine gelen node'un operation'ı boş olmayanları al ->> Giriş düğümündeki operasyonları seç listede tut
-            var dependentOperations = Connections
-                .Where(c => c.Output.Operation == operation && c.Input.Operation != null)
-                .Select(c => c.Input.Operation)
-                .OfType<OperationViewModel>()
-                .ToList();
+        //    //Connections: Tüm bağlantılar
+        //    // Çıkışı şu anki operasyondan üretilen -- Girişine gelen node'un operation'ı boş olmayanları al ->> Giriş düğümündeki operasyonları seç listede tut
+        //    var dependentOperations = Connections
+        //        .Where(c => c.Output.Operation == operation && c.Input.Operation != null)
+        //        .Select(c => c.Input.Operation)
+        //        .OfType<OperationViewModel>()
+        //        .ToList();
 
-            foreach (var dependentOperation in dependentOperations)
-            {
-                await ExecuteOperationAsync(dependentOperation); // Her dependent operasyon asenkron çalıştır
-            }
-        }
+        //    foreach (var dependentOperation in dependentOperations)
+        //    {
+        //        await ExecuteOperationAsync(dependentOperation); // Her dependent operasyon asenkron çalıştır
+        //    }
+        //}
+        #endregion
+
+
+
         ///IEnumerable -> LazyEvaluation var - kodun veri kaynağına bağımlılığı azaltılır veri kaynağı değişse de bir sorun yaratmaz 
         /// <-!!!!!!
         /// CODE GENERATION YAPILACAK ALAN
@@ -387,7 +356,6 @@ namespace Nodify.Calculator
             sb.AppendLine($@"using DriverBase;");
             sb.AppendLine($@"using DriverBase_Platform;");
             sb.AppendLine($@"using Octopus;");
-            sb.AppendLine($@"using Nodify.Calculator;");
 
             sb.AppendLine($@"public class TC_GENERATED_OMER : AbsTesterDriver");
             sb.AppendLine("{");
@@ -444,20 +412,7 @@ namespace Nodify.Calculator
                 }
             }
             sb.AppendLine("}");
-
-
             sb.AppendLine("}");
-            //string directoryPath = Path.Combine("..", "..", "..", "GeneratedCode");
-            //string filePath = Path.Combine(directoryPath, "GeneratedOperationsCode_GEN.cs");
-
-            //if (!Directory.Exists(directoryPath))
-            //{
-            //    Directory.CreateDirectory(directoryPath);
-            //}
-            //File.WriteAllText(filePath, sb.ToString());
-
-            //// Optionally inform the user
-            //Console.WriteLine($"Code generated successfully! Saved to {filePath}");
             return sb.ToString();
         }
 

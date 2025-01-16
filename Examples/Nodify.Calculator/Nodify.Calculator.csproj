@@ -10,10 +10,9 @@
   <ItemGroup>
     <PackageReference Include="StringMath" Version="4.1.2" />
   </ItemGroup>
-  
   <!--OCTOPUS ve DRIVER BASE dll referansları burada verilmiştir-->
   <ItemGroup>
-    <Reference Include="OctopusDriverBase">
+    <!--<Reference Include="OctopusDriverBase">
       <HintPath>..\..\..\..\DriverTAI\Bin\OctopusDriverBase.dll</HintPath>
     </Reference>
     <Reference Include="DriverBase">
@@ -21,28 +20,22 @@
     </Reference>
     <Reference Include="Octopus">
       <HintPath>..\..\..\..\DriverTAI\Bin\Octopus.dll</HintPath>
-    </Reference>
+    </Reference>-->
+    <ProjectReference Include ="c:\gitco\DriverTAI\Tests\C130\Tests\Drivers\DriverBase\DriverBase.csproj"/>
+    <ProjectReference Include ="c:\gitco\DriverTAI\octopus\OctopusDriverBase\OctopusDriverBase.csproj" />
+    <ProjectReference Include="c:\gitco\DriverTAI\octopus\octopus\Octopus.csproj"/>
   </ItemGroup>
   
   <!--Roslyn code analysis paketleri .dll olarak import edildi-->
-    <ItemGroup>
+    <!--<ItemGroup>
       <Reference Include="Microsoft.CodeAnalysis.CSharp">
         <HintPath>bin\Debug\net8\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
       </Reference>
       <Reference Include="Microsoft.CodeAnalysis">
         <HintPath>bin\Debug\net8\Microsoft.CodeAnalysis.dll</HintPath>  
       </Reference>
-    </ItemGroup>
+    </ItemGroup>-->
   
-  
-<!-- !!! dll Referanslama sonu-->
-  <PropertyGroup>
-    <CompileSingleFile Condition="'$(CompileSingleFile)' == 'true'">false</CompileSingleFile>
-  </PropertyGroup>
-
-  <Target Name="CompileSingleFile" Condition="'$(CompileSingleFile)' == 'true'">
-    <Csc Sources="$(SingleFileName)" OutputAssembly="$(OutputPath)\$(SingleFileName).dll" />
-  </Target>
   <ItemGroup>
     <ProjectReference Include="..\..\Nodify\Nodify.csproj" />
     <ProjectReference Include="..\Nodify.Shared\Nodify.Shared.csproj" />
